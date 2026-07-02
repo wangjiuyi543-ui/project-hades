@@ -1,0 +1,1892 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROJECT HADES — Deep Space Archive</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Bruno+Ace&family=Exo+2:wght@400;500;600;700;800;900&family=Marcellus&family=Marcellus+SC&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+@import url('https://fonts.cdnfonts.com/css/hfpoet');
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-snap-type:y proximity}
+body{background:#000;overflow-x:hidden;color:#fff;font-family:'Cormorant Garamond',serif}
+:root{--mx:50%;--my:50%;--p1fade:1;--p2fade:0}
+.page{position:relative;width:100%;height:100vh;overflow:hidden;scroll-snap-align:start}
+
+/* ========== 语言切换按钮 ========== */
+.lang-toggle{position:fixed;top:20px;right:20px;z-index:90;display:flex;align-items:center;gap:6px;background:rgba(8,12,28,0.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(100,180,255,0.3);border-radius:20px;padding:4px;cursor:pointer;transition:all 0.3s ease}
+.lang-toggle:hover{border-color:rgba(140,210,255,0.6)}
+.lang-option{font-family:'Montserrat',sans-serif;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;color:rgba(180,210,240,0.5);padding:4px 10px;border-radius:16px;transition:all 0.3s ease;text-align:center;min-width:32px}
+.lang-option.active{color:#fff;background:rgba(100,180,255,0.25)}
+.lang-toggle:hover .lang-option:not(.active){color:rgba(200,225,245,0.7)}
+
+/* ========== 第一页 ========== */
+.video-bg{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0;background:#020816}
+.vignette{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;background:radial-gradient(ellipse at 50% 50%,transparent 15%,rgba(15,5,40,0.35) 60%,rgba(0,0,0,0.85) 100%)}
+.top-fade{position:absolute;top:0;left:0;width:100%;height:100%;z-index:3;pointer-events:none}
+.p1 .top-fade{background:linear-gradient(to bottom,rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.2) 8%,transparent 20%)}
+.p1 .bottom-fade{position:absolute;top:0;left:0;width:100%;height:100%;z-index:3;pointer-events:none;background:linear-gradient(to bottom,transparent 50%,rgba(0,0,0,0.5) 75%,#000 100%)}
+.p1 .radial-overlay{position:absolute;top:0;left:0;width:100%;height:100%;z-index:4;pointer-events:none;background:radial-gradient(ellipse at 40% 35%,transparent 0%,rgba(0,0,0,0.25) 45%,rgba(0,0,0,0.55) 75%,rgba(0,0,0,0.8) 100%)}
+.p1-ui{position:absolute;top:0;left:0;width:100%;height:100%;z-index:5;opacity:var(--p1fade);transition:opacity 0.3s ease}
+
+/* 左上 Logo */
+.brand-wrap{position:absolute;top:4%;left:4%;z-index:6}
+.brand{font-family:'Cinzel',serif;font-weight:700;font-size:clamp(1.8rem,3vw,2.8rem);letter-spacing:0.08em;color:#fff;line-height:1;position:relative;opacity:0;animation:fadeUp 0.8s ease-out 0.3s forwards,voidGlow 3s ease-in-out 1.5s infinite}
+.brand sup{font-size:0.4em;vertical-align:super;color:rgba(100,180,255,0.9)}
+.brand::before{content:'';position:absolute;top:50%;left:50%;width:110%;height:150%;transform:translate(-50%,-50%);background:radial-gradient(ellipse,rgba(100,180,255,0.18) 0%,rgba(80,160,240,0.06) 40%,transparent 70%);animation:ringExpand 3s ease-out 1.5s infinite;pointer-events:none}
+.tagline{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:clamp(0.9rem,1.4vw,1.3rem);letter-spacing:0.12em;color:rgba(220,235,250,0.6);margin-top:6px;opacity:0;animation:fadeUp 0.8s ease-out 0.5s forwards}
+
+@keyframes voidGlow{
+  0%,100%{text-shadow:0 0 8px rgba(100,180,255,0.3),0 0 18px rgba(80,160,240,0.1);transform:scale(1)}
+  50%{text-shadow:0 0 20px rgba(120,200,255,0.85),0 0 45px rgba(100,180,255,0.4),0 0 75px rgba(80,160,240,0.15);transform:scale(1.03)}
+}
+
+/* 右上导航 */
+.nav{position:absolute;top:4.5%;right:4%;z-index:6;display:flex;gap:clamp(14px,2vw,32px);align-items:center;opacity:0;animation:fadeDown 0.8s ease-out 0.4s forwards;padding-right:90px}
+.nav a{font-family:'Marcellus SC',serif;font-size:clamp(0.75rem,1vw,0.95rem);letter-spacing:0.22em;color:rgba(220,235,250,0.7);text-transform:uppercase;text-decoration:none;position:relative;transition:color 0.3s;cursor:pointer}
+.nav a:hover{color:rgba(255,255,255,0.9)}
+.nav a.active{color:#fff;text-shadow:0 0 12px rgba(140,200,255,0.5)}
+.nav a.active::after{content:'';position:absolute;bottom:-6px;left:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,rgba(100,180,255,0.9),rgba(160,220,255,1),rgba(100,180,255,0.9),transparent);box-shadow:0 0 8px rgba(100,180,255,0.5)}
+.nav .search{font-size:clamp(0.8rem,1vw,1rem);color:rgba(220,235,250,0.6);cursor:pointer;transition:color 0.3s,text-shadow 0.3s}
+.nav .search:hover{color:rgba(160,220,255,1);text-shadow:0 0 12px rgba(100,180,255,0.6)}
+
+/* 中央主标题 */
+.hero{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:6}
+.hero h1{font-family:'Cinzel',serif;font-weight:700;font-size:clamp(3rem,11vw,9rem);letter-spacing:0.06em;color:rgba(180,210,255,0.92);line-height:0.95;position:relative;opacity:0;animation:heroIn 1.2s cubic-bezier(.2,1,.3,1) 0.6s forwards,giantScale 2.5s ease-in-out 2s infinite,stellarGlow 2.5s ease-in-out 2s infinite}
+.hero h1::after{content:attr(data-after);position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg,transparent 0%,rgba(180,230,255,1) 45%,rgba(255,255,255,1) 50%,rgba(180,230,255,1) 55%,transparent 100%);background-size:250% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:heroSweep 3s linear 2s infinite;mix-blend-mode:screen}
+.hero h1::before{content:'';position:absolute;top:50%;left:50%;width:100%;height:140%;transform:translate(-50%,-50%);background:radial-gradient(ellipse,rgba(100,180,255,0.2) 0%,rgba(80,160,240,0.08) 40%,transparent 70%);animation:ringExpand 2.5s ease-out 2s infinite;pointer-events:none;z-index:-1}
+.vol{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:clamp(1rem,1.8vw,1.6rem);letter-spacing:0.15em;color:rgba(210,230,245,0.9);margin-top:10px;opacity:0;animation:fadeUp 1s ease-out 1.2s forwards}
+
+@keyframes heroIn{
+  0%{opacity:0;transform:scale(2.5);letter-spacing:0.5em;filter:blur(20px)}
+  40%{opacity:0.5;filter:blur(5px)}
+  70%{opacity:1;transform:scale(0.92);letter-spacing:0.02em;filter:blur(0)}
+  85%{transform:scale(1.03)}
+  100%{opacity:1;transform:scale(1);letter-spacing:0.06em;filter:blur(0)}
+}
+@keyframes giantScale{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes stellarGlow{
+  0%,100%{text-shadow:0 0 20px rgba(100,170,255,0.5),0 0 50px rgba(80,140,220,0.2),0 0 90px rgba(60,120,200,0.1)}
+  50%{text-shadow:0 0 40px rgba(180,220,255,0.95),0 0 90px rgba(100,180,255,0.5),0 0 160px rgba(80,160,240,0.25)}
+}
+@keyframes heroSweep{0%{background-position:250% 0}100%{background-position:-250% 0}}
+@keyframes ringExpand{0%{transform:translate(-50%,-50%) scale(0.8);opacity:0.8}100%{transform:translate(-50%,-50%) scale(1.8);opacity:0}}
+
+/* 左侧标题块 */
+.report-block{position:absolute;left:4%;top:32%;max-width:28%;border-left:3px solid rgba(100,180,255,0.85);padding-left:16px;z-index:6}
+.report-label{font-family:'Cinzel',serif;font-weight:700;font-size:clamp(1.2rem,2.2vw,2rem);letter-spacing:0.06em;color:rgba(100,180,255,0.9);position:relative;opacity:0;animation:slideRight 0.8s ease-out 1.4s forwards,stellarPulse 3s ease-in-out 2.5s infinite}
+.report-label::before{content:'';position:absolute;top:50%;left:50%;width:115%;height:160%;transform:translate(-50%,-50%);background:radial-gradient(ellipse,rgba(100,180,255,0.15) 0%,transparent 70%);animation:ringExpand 3.5s ease-out 2.5s infinite;pointer-events:none}
+.report-title{font-family:'Cinzel',serif;font-weight:700;font-size:clamp(1.2rem,2.2vw,2rem);letter-spacing:0.06em;color:#fff;line-height:1.15;margin-top:8px;position:relative;opacity:0;animation:slideRight 0.8s ease-out 1.6s forwards,voidPulse 3.5s ease-in-out 2.8s infinite}
+.report-title::before{content:'';position:absolute;top:50%;left:50%;width:110%;height:150%;transform:translate(-50%,-50%);background:radial-gradient(ellipse,rgba(150,200,255,0.15) 0%,transparent 70%);animation:ringExpand 3.5s ease-out 2.8s infinite;pointer-events:none}
+
+@keyframes stellarPulse{
+  0%,100%{text-shadow:0 0 8px rgba(100,180,255,0.35),0 0 18px rgba(80,160,240,0.12);transform:scale(1)}
+  50%{text-shadow:0 0 22px rgba(120,200,255,0.9),0 0 45px rgba(100,180,255,0.4),0 0 75px rgba(80,160,240,0.15);transform:scale(1.04)}
+}
+@keyframes voidPulse{
+  0%,100%{text-shadow:0 0 8px rgba(200,225,255,0.35),0 0 18px rgba(150,200,255,0.12);transform:scale(1)}
+  50%{text-shadow:0 0 22px rgba(255,255,255,0.85),0 0 45px rgba(180,220,255,0.4),0 0 75px rgba(150,200,255,0.15);transform:scale(1.03)}
+}
+
+/* 正文滚动 */
+.body-wrap{margin-top:14px;animation:bodyCrush 0.3s cubic-bezier(.8,0,.2,1) 0s forwards,bodyFadeIn 0.8s ease-out 1.2s forwards}
+.report-body{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:clamp(0.85rem,1.1vw,1.05rem);line-height:1.9;color:rgba(215,230,245,0.85);width:72%;height:9.5em;overflow:hidden;-webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 15%,#000 85%,transparent 100%);mask-image:linear-gradient(to bottom,transparent 0%,#000 15%,#000 85%,transparent 100%)}
+.report-body .scroll{animation:bodyScroll 12s linear 2.5s infinite}
+.report-body p{margin-bottom:0.5em}
+
+@keyframes bodyScroll{0%{transform:translateY(0)}100%{transform:translateY(-50%)}}
+@keyframes bodyCrush{0%{transform:scale(1)}100%{transform:scale(0.3)}}
+@keyframes bodyFadeIn{0%{transform:scale(0.3);opacity:0}100%{transform:scale(1);opacity:1}}
+
+.read-btn{display:inline-block;margin-top:14px;font-family:'Montserrat',sans-serif;font-size:clamp(0.6rem,0.8vw,0.8rem);letter-spacing:0.2em;color:#000;background:rgba(100,180,255,0.9);border-radius:24px;padding:8px 20px;text-decoration:none;font-weight:600;opacity:0;animation:btnIn 0.6s ease-out 2.4s forwards;cursor:pointer;transition:background 0.3s,transform 0.3s}
+.read-btn:hover{background:rgba(130,210,255,1);transform:translateY(-2px)}
+
+/* 右下活动信息 */
+.event-block{position:absolute;right:4%;bottom:8%;text-align:right;border-right:3px solid rgba(100,180,255,0.85);padding-right:16px;z-index:6}
+.event-label{font-family:'Marcellus SC',serif;font-weight:700;font-size:clamp(0.85rem,1.2vw,1.1rem);letter-spacing:0.18em;color:rgba(100,180,255,0.9);position:relative;opacity:0;animation:slideLeft 0.8s ease-out 1.5s forwards,stellarPulse 3s ease-in-out 2.3s infinite}
+.event-label::before{content:'';position:absolute;top:50%;left:50%;width:115%;height:160%;transform:translate(-50%,-50%);background:radial-gradient(ellipse,rgba(100,180,255,0.15) 0%,transparent 70%);animation:ringExpand 3s ease-out 2.3s infinite;pointer-events:none}
+.event-name{font-family:'Marcellus',serif;font-weight:500;font-size:clamp(0.95rem,1.4vw,1.3rem);color:#fff;margin-top:4px;opacity:0;animation:slideLeft 0.8s ease-out 1.7s forwards,eventBreath 4s ease-in-out 3s infinite}
+
+@keyframes eventBreath{0%,100%{opacity:0.85;transform:scale(1)}50%{opacity:1;transform:scale(1.02)}}
+
+/* 右侧竖排小字 */
+.vert-side{position:absolute;right:1.5%;top:50%;transform:translateY(-50%);writing-mode:vertical-rl;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.65rem;letter-spacing:0.3em;color:rgba(180,200,220,0.5);z-index:6;opacity:0;animation:fadeIn 1.5s ease-in 2.5s forwards;white-space:nowrap}
+
+/* 通用入场动画 */
+@keyframes fadeUp{0%{opacity:0;transform:translateY(40px) scale(0.9)}60%{opacity:1;transform:translateY(-5px) scale(1.02)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fadeDown{0%{opacity:0;transform:translateY(-40px) scale(0.9)}60%{opacity:1;transform:translateY(5px) scale(1.02)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fadeIn{0%{opacity:0;transform:scale(1.3)}60%{opacity:0.8}100%{opacity:1;transform:scale(1)}}
+@keyframes slideRight{0%{opacity:0;transform:translateX(-80px) scale(0.85)}60%{opacity:1;transform:translateX(10px) scale(1.03)}100%{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes slideLeft{0%{opacity:0;transform:translateX(80px) scale(0.85)}60%{opacity:1;transform:translateX(-10px) scale(1.03)}100%{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes btnIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+
+/* ========== 滑出档案面板 ========== */
+.panel-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:100;background:rgba(0,0,0,0.6);opacity:0;pointer-events:none;transition:opacity 0.4s ease}
+.panel-overlay.active{opacity:1;pointer-events:auto}
+.panel{position:fixed;top:0;right:0;width:min(520px,90vw);height:100%;z-index:110;background:rgba(8,12,28,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-left:1px solid rgba(100,180,255,0.25);transform:translateX(100%);transition:transform 0.5s cubic-bezier(.4,0,.2,1);overflow-y:auto;padding:60px 40px}
+.panel.active{transform:translateX(0)}
+.panel-close{position:absolute;top:24px;right:24px;background:none;border:none;color:rgba(200,220,240,0.6);font-size:1.5rem;cursor:pointer;transition:color 0.3s;font-family:'Cinzel',serif;z-index:115}
+.panel-close:hover{color:#fff}
+.panel h2{font-family:'Cinzel',serif;font-weight:700;font-size:1.6rem;letter-spacing:0.08em;color:rgba(100,180,255,0.9);margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid rgba(100,180,255,0.2)}
+.panel h3{font-family:'Marcellus SC',serif;font-size:1rem;letter-spacing:0.12em;color:rgba(180,210,240,0.8);margin:20px 0 10px}
+.panel p,.panel .log-entry{font-family:'Cormorant Garamond',serif;font-size:1rem;line-height:1.9;color:rgba(200,220,240,0.55);margin-bottom:10px}
+.panel .log-time{color:rgba(100,180,255,0.7);font-family:'Marcellus',serif;font-size:0.85rem;margin-right:10px}
+.panel .source-note{font-family:'Exo 2',sans-serif;font-size:0.7rem;letter-spacing:0.06em;color:rgba(120,180,220,0.35);margin-bottom:18px;padding:8px 12px;border-left:2px solid rgba(100,180,255,0.15);line-height:1.5}
+.panel .crew-list{display:flex;flex-direction:column;gap:8px}
+.panel .crew-item{font-family:'Marcellus',serif;font-size:0.95rem;color:rgba(200,220,240,0.6);display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(100,180,255,0.08)}
+.panel .crew-status{color:rgba(255,140,100,0.8);font-size:0.8rem;letter-spacing:0.1em}
+.panel .crew-note{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.78rem;line-height:1.5;color:rgba(160,190,220,0.4);margin-top:2px;padding-left:4px;border-left:1px solid rgba(100,180,255,0.12)}
+.panel .classified{color:rgba(255,100,80,0.7);font-size:0.75rem;letter-spacing:0.15em;margin-top:16px;padding:12px;border:1px dashed rgba(255,100,80,0.3);border-radius:4px}
+
+/* ========== 打字机效果 ========== */
+.typewriter{font-family:'Cormorant Garamond',serif;font-size:0.95rem;line-height:2;color:rgba(200,225,240,0.7);white-space:pre-wrap;min-height:60px}
+
+/* ========== 第二页 ========== */
+.art-bg{position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;background-color:#020816;background-image:url('assets/星骸基底.png'),linear-gradient(180deg,#020816,#0a1830);background-size:cover;background-position:center}
+.stardust-dots{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:hidden}
+.stardust-dots span{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(200,225,255,0.85) 0%,rgba(200,225,255,0.15) 60%,transparent 100%);animation:stardustFloat linear infinite}
+.mask-layer{position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;background:url('assets/星骸生晶.png') center/cover no-repeat,linear-gradient(135deg,#020816,#0a1830);-webkit-mask-image:radial-gradient(circle 240px at var(--mx) var(--my),transparent 0%,transparent 50%,black 100%);mask-image:radial-gradient(circle 240px at var(--mx) var(--my),transparent 0%,transparent 50%,black 100%);pointer-events:none;animation:oreBreath 6s ease-in-out infinite}
+.p2 .top-fade{position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;pointer-events:none;background:linear-gradient(to bottom,#000 0%,rgba(0,0,0,0.92) 12%,rgba(0,0,0,0.5) 30%,transparent 50%)}
+.p2-ui{position:absolute;top:0;left:0;width:100%;height:100%;z-index:3;pointer-events:none}
+.p2-ui .fade-in{opacity:var(--p2fade);transition:opacity 0.3s ease}
+
+@keyframes stardustFloat{
+  0%{transform:translateY(0) translateX(0);opacity:0}
+  20%{opacity:0.6}
+  80%{opacity:0.6}
+  100%{transform:translateY(-100vh) translateX(-20px);opacity:0}
+}
+
+/* 左侧竖排小字 */
+.vert-left{position:absolute;top:50%;left:5%;transform:translateY(-50%);writing-mode:vertical-rl;font-size:0.95rem;letter-spacing:0.3em;color:rgba(230,235,245,0.65);animation:vertBreathe 6s ease-in-out infinite;white-space:nowrap}
+@keyframes vertBreathe{0%,100%{opacity:0.4}50%{opacity:0.85}}
+
+/* 主标题 */
+.art-title{position:absolute;top:20%;left:50%;transform:translate(-50%,-50%);font-family:'HFPoet',serif;font-size:clamp(2.8rem,7vw,5.5rem);font-weight:400;letter-spacing:0.04em;text-align:center;color:rgba(238,242,252,0.92);white-space:nowrap;animation:artFloat 8s ease-in-out infinite,artGlow 5s ease-in-out infinite,artSway 12s ease-in-out infinite}
+.art-title span{display:inline-block;background:linear-gradient(100deg,rgba(238,242,252,0.7) 0%,rgba(140,200,255,1) 50%,rgba(238,242,252,0.7) 100%);background-size:200% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:charGlow 3.5s ease-in-out infinite}
+
+@keyframes artFloat{0%,100%{transform:translate(-50%,-50%) translateY(0)}50%{transform:translate(-50%,-50%) translateY(-44px)}}
+@keyframes artGlow{
+  0%,100%{opacity:0.72;text-shadow:0 0 24px rgba(140,180,255,0.3),0 0 60px rgba(120,150,230,0.15);filter:brightness(0.9)}
+  50%{opacity:1;text-shadow:0 0 48px rgba(140,180,255,0.7),0 0 120px rgba(120,150,230,0.35);filter:brightness(1.2)}
+}
+@keyframes artSway{0%,100%{letter-spacing:0.22em}50%{letter-spacing:0.32em}}
+@keyframes charGlow{0%,100%{background-position:0% 0;transform:translateY(0)}50%{background-position:100% 0;transform:translateY(-6px)}}
+
+/* 副标题 */
+.art-sub{position:absolute;top:27%;left:50%;transform:translate(-50%,-50%);font-family:'HFPoet',serif;font-style:normal;font-weight:400;font-size:clamp(1.2rem,2.5vw,2rem);letter-spacing:0.04em;text-align:center;color:rgba(210,220,238,0.55);white-space:nowrap;animation:artSubFloat 11s ease-in-out infinite}
+@keyframes artSubFloat{0%,100%{transform:translate(-50%,-50%) translateY(0);opacity:0.5}50%{transform:translate(-50%,-50%) translateY(-14px);opacity:0.75}}
+
+/* 右下三列小字 */
+.p2blocks{position:absolute;right:5%;bottom:16%;width:54%;display:flex;gap:6%}
+.p2blocks .col{flex:1;display:flex;flex-direction:column;gap:9px}
+.p2blocks .line{font-size:0.72rem;letter-spacing:0.12em;color:rgba(210,220,232,0.65);text-transform:uppercase;line-height:1.5;animation:lineBreath 7s ease-in-out infinite}
+.p2blocks .col:nth-child(2) .line{animation-delay:1.1s}
+.p2blocks .col:nth-child(3) .line{animation-delay:2.2s}
+
+@keyframes lineBreath{0%,100%{opacity:0.6}50%{opacity:0.92}}
+
+/* Explore/Download 按钮 */
+.explore{position:absolute;right:7%;bottom:9%;pointer-events:auto;cursor:pointer;background:rgba(8,12,28,0.7);border:1px solid rgba(100,180,255,0.15);border-radius:2px;color:rgba(225,230,240,0.8);font-size:0.92rem;letter-spacing:0.28em;text-transform:uppercase;font-family:'Montserrat',sans-serif;padding:10px 24px;transition:color 0.3s,background 0.3s,border-color 0.3s;animation:btnBeacon 4s ease-in-out 3s infinite}
+.explore:hover{color:rgba(160,220,255,1);background:rgba(8,12,28,0.9);border-color:rgba(140,210,255,0.5)}
+.explore::after{content:'';display:block;width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(160,200,255,0.6),transparent);transform:scaleX(0.5);transition:transform 0.4s ease,background 0.4s ease;margin-top:4px}
+.explore:hover::after{transform:scaleX(1);background:linear-gradient(90deg,transparent,rgba(160,220,255,0.95),transparent)}
+
+/* ========== 矿石扫描热点 ========== */
+.hotspot{position:absolute;pointer-events:auto;cursor:pointer;z-index:4}
+.hotspot-dot{width:14px;height:14px;border-radius:50%;background:rgba(100,180,255,0.4);border:2px solid rgba(140,210,255,0.8);position:relative;animation:hotspotPulse 2s ease-in-out infinite;transition:background 0.3s,border-color 0.3s}
+.hotspot:hover .hotspot-dot{background:rgba(140,210,255,0.8);border-color:rgba(180,230,255,1)}
+.hotspot-dot::after{content:'';position:absolute;top:50%;left:50%;width:40px;height:40px;transform:translate(-50%,-50%);border:1px solid rgba(100,180,255,0.3);border-radius:50%;animation:hotspotRing 2s ease-out infinite}
+.hotspot-dot .auto-burst{position:absolute;top:50%;left:50%;width:40px;height:40px;transform:translate(-50%,-50%);border:2px solid rgba(140,210,255,0.7);border-radius:50%;animation:hotspotAutoBurst 2s ease-out infinite;pointer-events:none}
+@keyframes hotspotPulse{0%,100%{box-shadow:0 0 8px rgba(100,180,255,0.4)}50%{box-shadow:0 0 20px rgba(140,210,255,0.8)}}
+@keyframes hotspotRing{0%{width:14px;height:14px;opacity:1}100%{width:50px;height:50px;opacity:0}}
+@keyframes btnBeacon{0%,100%{box-shadow:0 0 6px rgba(100,180,255,0.1),0 0 1px rgba(100,180,255,0.25);border-color:rgba(100,180,255,0.12)}50%{box-shadow:0 0 36px rgba(120,200,255,0.7),0 0 12px rgba(120,200,255,0.8);border-color:rgba(140,210,255,0.65)}}
+@keyframes oreBreath{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.06);filter:brightness(1.15)}}
+@keyframes hotspotAutoBurst{0%{transform:translate(-50%,-50%) scale(0);opacity:1}50%{transform:translate(-50%,-50%) scale(4);opacity:0.6}100%{transform:translate(-50%,-50%) scale(0);opacity:0}}
+
+.hotspot-card{position:absolute;bottom:calc(100% + 16px);left:50%;transform:translateX(-50%);background:rgba(8,12,28,0.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(100,180,255,0.3);border-radius:8px;padding:16px 20px;width:260px;opacity:0;pointer-events:none;transition:opacity 0.3s ease;white-space:normal}
+.hotspot.active .hotspot-card{opacity:1;pointer-events:auto}
+.hotspot-card h4{font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.12em;color:rgba(100,180,255,0.9);margin-bottom:6px;text-transform:uppercase}
+.hotspot-card p{font-family:'Cormorant Garamond',serif;font-size:0.85rem;line-height:1.7;color:rgba(200,220,240,0.55)}
+.hotspot-card::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:8px solid transparent;border-top-color:rgba(100,180,255,0.3)}
+
+/* ========== 下载扫描数据弹窗 ========== */
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:120;background:rgba(0,0,0,0.7);opacity:0;pointer-events:none;transition:opacity 0.4s ease;display:flex;align-items:center;justify-content:center}
+.modal-overlay.active{opacity:1;pointer-events:auto}
+.modal-card{background:rgba(8,12,28,0.95);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(100,180,255,0.25);border-radius:12px;padding:40px;width:min(560px,90vw);max-height:80vh;overflow-y:auto;position:relative;transform:translateY(20px);transition:transform 0.5s cubic-bezier(.4,0,.2,1)}
+.modal-overlay.active .modal-card{transform:translateY(0)}
+.modal-card .close-btn{position:absolute;top:20px;right:20px;background:none;border:none;color:rgba(200,220,240,0.6);font-size:1.5rem;cursor:pointer;font-family:'Cinzel',serif;transition:color 0.3s;z-index:125}
+.modal-card .close-btn:hover{color:#fff}
+.modal-card h2{font-family:'Cinzel',serif;font-weight:700;font-size:1.4rem;letter-spacing:0.08em;color:rgba(100,180,255,0.9);margin-bottom:20px}
+.modal-card .section{font-family:'Marcellus SC',serif;font-size:0.8rem;letter-spacing:0.12em;color:rgba(180,210,240,0.7);margin-top:16px;margin-bottom:6px}
+.modal-card .value{font-family:'Cormorant Garamond',serif;font-size:1rem;color:rgba(200,220,240,0.5);line-height:1.8}
+.modal-card .chart{width:100%;height:120px;background:rgba(100,180,255,0.05);border:1px solid rgba(100,180,255,0.15);border-radius:8px;margin:16px 0;position:relative;overflow:hidden}
+.modal-card .chart-bar{position:absolute;bottom:0;background:linear-gradient(to top,rgba(100,180,255,0.5),rgba(140,210,255,0.2));border-radius:2px 2px 0 0;transition:height 1.5s cubic-bezier(.4,0,.2,1)}
+.modal-card .chart-label{position:absolute;bottom:-20px;font-family:'Montserrat',sans-serif;font-size:0.55rem;letter-spacing:0.08em;color:rgba(180,200,220,0.5);transform:translateX(-50%)}
+
+/* ========== 左侧抽屉 ========== */
+.drawer-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:100;background:rgba(0,0,0,0.6);opacity:0;pointer-events:none;transition:opacity 0.4s ease}
+.drawer-overlay.active{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;left:0;width:min(580px,92vw);height:100%;z-index:110;background:rgba(8,12,28,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-right:1px solid rgba(100,180,255,0.25);transform:translateX(-100%);transition:transform 0.5s cubic-bezier(.4,0,.2,1);overflow-y:auto;padding:60px 40px}
+.drawer.active{transform:translateX(0)}
+.drawer .drawer-close{position:absolute;top:24px;right:24px;background:none;border:none;color:rgba(200,220,240,0.6);font-size:1.5rem;cursor:pointer;font-family:'Cinzel',serif;transition:color 0.3s;z-index:115}
+.drawer .drawer-close:hover{color:#fff}
+.drawer h2{font-family:'Cinzel',serif;font-weight:700;font-size:1.5rem;letter-spacing:0.08em;color:rgba(100,180,255,0.9);margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid rgba(100,180,255,0.2)}
+.drawer .stamp{display:inline-block;font-family:'Marcellus SC',serif;font-size:0.7rem;letter-spacing:0.2em;color:rgba(255,100,80,0.6);border:1px solid rgba(255,100,80,0.3);padding:4px 10px;margin-bottom:20px;border-radius:2px;text-transform:uppercase}
+.drawer p{font-family:'Cormorant Garamond',serif;font-size:1rem;line-height:1.9;color:rgba(200,220,240,0.5);margin-bottom:12px}
+.drawer .specs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}
+.drawer .spec-item{border:1px solid rgba(100,180,255,0.12);padding:12px;border-radius:4px}
+.drawer .spec-label{font-family:'Marcellus SC',serif;font-size:0.65rem;letter-spacing:0.1em;color:rgba(100,180,255,0.6);margin-bottom:4px}
+.drawer .spec-value{font-family:'Cinzel',serif;font-size:1rem;color:rgba(200,220,240,0.7)}
+
+/* ========== 世界观档案覆盖层 ========== */
+.lore-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:125;background:rgba(0,0,0,0.93);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);opacity:0;pointer-events:none;transition:opacity 0.45s ease;overflow-y:auto}
+.lore-overlay.active{opacity:1;pointer-events:auto}
+.lore-container{max-width:860px;margin:0 auto;padding:80px 40px 120px;position:relative}
+.lore-close{position:fixed;top:24px;right:24px;background:none;border:none;color:rgba(200,220,240,0.6);font-size:1.6rem;cursor:pointer;font-family:'Cinzel',serif;transition:color 0.3s;z-index:126}
+.lore-close:hover{color:#fff}
+.lore-hdr{margin-bottom:50px;text-align:center}
+.lore-hdr .lore-eyebrow{font-family:'Marcellus SC',serif;font-size:0.7rem;letter-spacing:0.25em;color:rgba(100,180,255,0.65);margin-bottom:10px;text-transform:uppercase}
+.lore-hdr h1{font-family:'Cinzel',serif;font-weight:700;font-size:clamp(1.6rem,3.2vw,2.4rem);letter-spacing:0.1em;color:#fff;line-height:1.3}
+.lore-hdr .lore-meta{font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:rgba(200,220,240,0.4);margin-top:8px;letter-spacing:0.06em}
+.lore-sec{margin-bottom:44px}
+.lore-sec h2{font-family:'Cinzel',serif;font-weight:600;font-size:clamp(1.1rem,1.7vw,1.35rem);letter-spacing:0.08em;color:rgba(140,200,255,0.88);border-bottom:1px solid rgba(100,180,255,0.12);padding-bottom:10px;margin-bottom:18px}
+.lore-sec h3{font-family:'Marcellus SC',serif;font-weight:500;font-size:clamp(0.9rem,1.2vw,1.05rem);letter-spacing:0.06em;color:rgba(180,210,240,0.72);margin:22px 0 10px}
+.lore-sec p{font-family:'Cormorant Garamond',serif;font-size:1.02rem;line-height:1.95;color:rgba(200,220,240,0.52);margin-bottom:14px}
+.lore-sec p strong{color:rgba(220,235,250,0.78);font-weight:600}
+.lore-tbl{width:100%;border-collapse:collapse;margin:14px 0 22px;font-family:'Cormorant Garamond',serif;font-size:0.92rem}
+.lore-tbl th{text-align:left;padding:9px 12px;border-bottom:2px solid rgba(100,180,255,0.2);color:rgba(140,200,255,0.85);font-family:'Marcellus SC',serif;font-size:0.72rem;letter-spacing:0.1em}
+.lore-tbl td{padding:9px 12px;border-bottom:1px solid rgba(100,180,255,0.07);color:rgba(200,220,240,0.52);line-height:1.55}
+.lore-tbl tr:last-child td{border-bottom:none}
+.lore-sec ul,.lore-sec ol{padding-left:22px;margin:10px 0 18px}
+.lore-sec li{font-family:'Cormorant Garamond',serif;font-size:0.98rem;line-height:1.9;color:rgba(200,220,240,0.48);margin-bottom:5px;list-style-type:'\25C6  '}
+.lore-sec li::marker{color:rgba(100,180,255,0.45)}
+.lore-bq{border-left:3px solid rgba(100,180,255,0.3);padding:14px 18px;margin:18px 0;background:rgba(100,180,255,0.03);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.98rem;line-height:1.8;color:rgba(200,220,240,0.48)}
+.lore-bq strong{color:rgba(200,220,240,0.65)}
+.lore-code{font-family:'Exo 2','Courier New',monospace;font-size:0.82rem;line-height:1.7;color:rgba(180,210,240,0.6);background:rgba(8,12,28,0.45);border:1px solid rgba(100,180,255,0.1);padding:18px 22px;border-radius:4px;margin:14px 0;white-space:pre-wrap;overflow-x:auto}
+.lore-hr{border:none;border-top:1px solid rgba(100,180,255,0.1);margin:36px 0}
+.lore-sec .lore-tag{display:inline-block;font-family:'Montserrat',sans-serif;font-size:0.58rem;font-weight:600;letter-spacing:0.1em;padding:2px 7px;border-radius:3px;margin-right:5px;background:rgba(100,180,255,0.1);color:rgba(140,200,255,0.65)}
+.lore-vert{writing-mode:vertical-rl;position:fixed;left:2%;top:50%;transform:translateY(-50%);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.7rem;letter-spacing:0.32em;color:rgba(180,200,220,0.2);pointer-events:none;z-index:126}
+
+/* ========== 全屏搜索覆盖层 ========== */
+.search-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:130;background:rgba(0,0,0,0.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);opacity:0;pointer-events:none;transition:opacity 0.4s ease;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:12vh}
+.search-overlay.active{opacity:1;pointer-events:auto}
+.search-container{width:min(720px,92vw);position:relative}
+.search-close{position:absolute;top:-48px;right:0;background:none;border:none;color:rgba(200,220,240,0.5);font-size:1.6rem;cursor:pointer;font-family:'Cinzel',serif;transition:color 0.3s}
+.search-close:hover{color:#fff}
+.search-input-wrap{position:relative;border:1px solid rgba(100,180,255,0.35);border-radius:8px;background:rgba(8,12,28,0.7);overflow:hidden;transition:border-color 0.3s,box-shadow 0.3s}
+.search-input-wrap:focus-within{border-color:rgba(140,210,255,0.8);box-shadow:0 0 30px rgba(100,180,255,0.15)}
+.search-input{width:100%;background:transparent;border:none;outline:none;padding:22px 24px 22px 56px;color:rgba(220,235,250,0.95);font-family:'Cormorant Garamond',serif;font-size:1.4rem;letter-spacing:0.04em}
+.search-input::placeholder{color:rgba(140,170,200,0.35)}
+.search-icon-input{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:rgba(100,180,255,0.6);font-size:1.2rem;pointer-events:none}
+.search-hints{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;opacity:0;transform:translateY(-10px);transition:opacity 0.3s,transform 0.3s}
+.search-overlay.active .search-hints{opacity:1;transform:translateY(0)}
+.search-hint{font-family:'Montserrat',sans-serif;font-size:0.65rem;letter-spacing:0.1em;color:rgba(160,190,220,0.5);padding:5px 10px;border:1px solid rgba(100,180,255,0.15);border-radius:14px;cursor:pointer;transition:all 0.3s}
+.search-hint:hover{color:rgba(200,225,255,0.9);border-color:rgba(140,210,255,0.5);background:rgba(100,180,255,0.08)}
+.search-results{margin-top:28px;max-height:60vh;overflow-y:auto}
+.search-category{font-family:'Marcellus SC',serif;font-size:0.7rem;letter-spacing:0.14em;color:rgba(100,180,255,0.7);margin:18px 0 10px;padding-left:4px;text-transform:uppercase;border-left:2px solid rgba(100,180,255,0.4)}
+.search-result-item{padding:14px 16px;margin-bottom:8px;background:rgba(100,180,255,0.05);border:1px solid rgba(100,180,255,0.12);border-radius:6px;cursor:pointer;transition:all 0.25s ease}
+.search-result-item:hover{background:rgba(100,180,255,0.12);border-color:rgba(140,210,255,0.4);transform:translateX(6px)}
+.search-result-title{font-family:'Cinzel',serif;font-size:0.85rem;letter-spacing:0.06em;color:rgba(220,235,250,0.9);margin-bottom:4px}
+.search-result-snippet{font-family:'Cormorant Garamond',serif;font-size:0.85rem;line-height:1.5;color:rgba(180,205,230,0.5)}
+.search-result-title mark,.search-result-snippet mark{background:transparent;color:rgba(140,210,255,1);font-weight:600;text-shadow:0 0 10px rgba(100,180,255,0.4)}
+.search-empty{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:rgba(180,205,230,0.4);text-align:center;margin-top:40px;font-style:italic}
+.search-shortcut{position:absolute;top:20px;left:20px;font-family:'Montserrat',sans-serif;font-size:0.6rem;letter-spacing:0.1em;color:rgba(160,190,220,0.35)}
+
+/* ========== 响应式 ========== */
+@media (max-width:768px){
+  .report-block{max-width:60%;top:28%}
+  .report-body{width:90%}
+  .p2blocks{width:80%;right:5%}
+  .hero h1{font-size:clamp(2rem,8vw,5rem)}
+  .nav{gap:10px;padding-right:80px}
+  .nav a{font-size:0.65rem;letter-spacing:0.12em}
+  .panel{width:100vw}
+  .drawer{width:100vw}
+  .lang-toggle{top:12px;right:12px}
+  .search-container{padding:0 16px}
+  .search-input{font-size:1.1rem;padding:18px 18px 18px 48px}
+}
+/* prefers-reduced-motion: disable all animations for vestibular sensitivity */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:0.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important;
+  }
+}
+</style>
+<meta name="description" content="PROJECT HADES — Federal Space Administration classified archive. The USSV Odin was lost in Sector-7. 12 crew members. Unaccounted for. The truth remains classified.">
+<meta property="og:title" content="PROJECT HADES — Deep Space Archive">
+<meta property="og:description" content="CONTACT LOST. 12 crew members. Last transmission received at 2187.03.14 04:17:22. The official cause is a lie.">
+<meta property="og:image" content="assets/星骸生晶.png">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#020816">
+</head>
+<body>
+
+<!-- ========== 语言切换按钮 ========== -->
+<button class="lang-toggle" id="langToggle" aria-label="Switch language">
+  <span class="lang-option active" data-lang="en">EN</span>
+  <span class="lang-option" data-lang="cn">CN</span>
+</button>
+
+<!-- ========== 全屏搜索覆盖层 ========== -->
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-shortcut" data-i18n="search-shortcut">PRESS / TO SEARCH</div>
+  <div class="search-container">
+    <button class="search-close" id="searchClose">&#x2715;</button>
+    <div class="search-input-wrap">
+      <span class="search-icon-input">&#x2315;</span>
+      <input type="text" class="search-input" id="searchInput" autocomplete="off" data-i18n-placeholder="search-placeholder">
+    </div>
+    <div class="search-hints" id="searchHints"></div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+</div>
+
+<!-- ========== 世界观档案覆盖层 ========== -->
+<div class="lore-overlay" id="loreOverlay">
+  <button class="lore-close" id="loreClose">&#x2715;</button>
+  <div class="lore-vert">PROJECT HADES &middot; CLASSIFIED ARCHIVE &middot; CLEARANCE LEVEL 4</div>
+  <div class="lore-container" id="loreContainer"></div>
+</div>
+
+<script type="text/markdown" id="loreMd">
+# PROJECT HADES — 完整世界观档案
+
+> **密级：4 级安全许可 | 文件编号：FSA-DSOC-2187-HADES-001**
+> **解密日期：2192.06.01**
+> **文件属性：联邦航天局财产。未经授权访问依据《深空行动法》第 47 条追诉。**
+
+---
+
+## 一、时代背景
+
+### 1.1 联邦航天局（Federal Space Administration, FSA）
+
+2187 年，人类已建立起跨越太阳系外缘的深空探测网络。联邦航天局（FSA）作为最高航天管理机构，下设深空行动中心（Deep Space Operations Center, DSOC），负责所有 3 级及以上任务规划、执行与情报管理。
+
+FSA 在多个地外轨道站部署了深空观测阵列，其中最具规模的是位于拉格朗日点 L4 的**开普勒-9 轨道站（Kepler-9 Orbiting Station）**。该站配备高灵敏度长基线干涉仪，可探测到数百光年外的微弱电磁异常。
+
+### 1.2 第七星区（Sector-7）
+
+第七星区是银河系英仙臂边缘的一片低密度星域，距太阳系约 84 光年。该区域恒星稀疏，星际介质稀薄，长期被视为"深空荒漠"。FSA 从未对第七星区进行过载人探测——直到 2187 年，开普勒-9 的传感器捕捉到一个**无法解释的持续性能量信号**。
+
+### 1.3 奥丁级勘探舰（Odin-class Exploration Vessel）
+
+奥丁级是 FSA 最先进的深空勘探舰，全长 187 米，配备离子-核热混合推进系统、全舰段结构传感器阵列，以及当时最精密的 SX-9000 型光谱分析仪。该级舰设计标准乘员 12–16 人，可维持 18 个月的自主航行。
+
+USS 奥丁号（USSV Odin），编号 NX-724，是奥丁级第三艘下水舰艇，也是首艘被派往第七星区执行机密任务的载人舰船。
+
+---
+
+## 二、哈迪斯计划（PROJECT HADES）
+
+### 2.1 任务概述
+
+| 项目 | 详情 |
+|------|------|
+| **项目代号** | PROJECT HADES（哈迪斯计划） |
+| **任务编号** | 深空任务 724（Deep Space Mission 724） |
+| **执行舰船** | USSV Odin（奥丁号），奥丁级勘探舰 NX-724 |
+| **出发日期** | 2187.02.18 |
+| **目标星区** | 第七星区（Sector-7） |
+| **目标坐标** | 47.2, -118.6（银道坐标系） |
+| **任务性质** | 机密矿石勘测 |
+| **任务参数** | 定位 → 识别 → 报告（严格限于观测性质） |
+| **预定航程** | 14 个月（往返 + 观测） |
+| **乘员** | 12 人 |
+| **密级** | 4 级 |
+
+### 2.2 任务起因
+
+2186 年 11 月，开普勒-9 深空观测阵列在常规扫描中，于第七星区探测到一束极微弱但**频谱空前异常**的能量信号。信号呈现出以下特征：
+
+- **无法匹配任何已知天体物理源**——不是脉冲星、不是超新星遗迹、不是黑洞吸积盘辐射
+- **具备周期性结构**，间隔约 7.4 秒，暗示着某种有序的物理过程
+- **强度虽弱但极为稳定**，连续观测 6 周未见衰减
+
+经过半年分析，FSA 科学家无法在现有物理学框架内解释该信号。2187 年 1 月，DSOC 批准了代号"哈迪斯"的机密勘测任务——派出一艘载人勘探舰，抵近信号源坐标进行直接观测和样本采集。
+
+### 2.3 为什么叫"哈迪斯"
+
+哈迪斯（Hades）是希腊神话中的冥界之神。项目以此命名，有三层含义：
+
+1. **表面含义**：信号来自一片"死亡"的深空荒漠，恰如冥界
+2. **隐含含义**：FSA 高层对任务风险已有不安的预感——进入冥界者，未必能返回
+3. **档案隐喻**：事后看来，这个名字精准预示了任务的结局
+
+---
+
+## 三、行动时间线
+
+### 3.1 任务日志（Mission Log）
+
+| 时间 | 事件 |
+|------|------|
+| **2187.02.18** | 奥丁号从开普勒-9 轨道站出发，进入深空巡航模式 |
+| **2187.03.07** | 飞抵第七星区边界。远程传感器确认目标能量信号仍活跃 |
+| **2187.03.10** | 进入第七星区深处。能量信号显著增强，已能在中等距离通过舰载 SX-9000 光谱仪精确定向 |
+| **2187.03.12** | 异常信号锁定于坐标 47.2, -118.6。奥丁号调整航线，全速抵近 |
+| **2187.03.14 03:58** | 目标进入光学观测距离。初步成像显示一个直径约 1.4 公里的不规则岩质天体，表面无撞击坑，疑似非天然形成 |
+| **2187.03.14 04:12:09** | 视觉接触确认。光谱分析返回无法匹配联邦数据库中任何已知矿物成分的结果。首席科学家奥塞博士标注："新物质。未被记录。" |
+| **2187.03.14 04:15:32** | 奥丁号进入主动扫描模式。舰载传感器在全频段探测到来自矿体的能量脉冲——波形非自然，疑似有组织结构 |
+| **2187.03.14 04:17:00** | 能量读数开始不可控攀升 |
+| **2187.03.14 04:17:09** | 能量尖峰首次被舰体结构传感器捕获。舰长沃斯下令全光谱紧急分析 |
+| **2187.03.14 04:17:12** | 导航官陈上尉报告：能量输出持续上升，系统无法抑制 |
+| **2187.03.14 04:17:15** | 奥塞博士确认矿石具备**自主能量产生能力**——违反热力学定律 |
+| **2187.03.14 04:17:18** | 沃斯舰长下令全体船员应急准备。通讯中断 |
+| **2187.03.14 04:17:22** | 信号完全丢失。所有中继站接续联络尝试均告失败 |
+| **2187.03.17** | 根据欧米茄协议（Protocol Omega），72 小时后搜救行动正式中止 |
+
+### 3.2 时间线压缩视图
+
+```
+2187.02.18        出发
+    │
+    ▼
+2187.03.07        抵达第七星区
+    │
+    ▼
+2187.03.10        进入星区深处
+    │
+    ▼
+2187.03.12        锁定目标坐标
+    │
+    ▼
+2187.03.14 03:58  光学捕获目标
+    │
+    ▼
+2187.03.14 04:12  确认未知矿物
+    │
+    ▼
+2187.03.14 04:15  主动扫描，发现异常能量
+    │
+    ▼
+2187.03.14 04:17  能量失控，通讯中断
+    │
+    ▼
+2187.03.17        搜救中止（Protocol Omega）
+```
+
+**从首次光学捕获到完全失联，全程不到 20 分钟。**
+
+---
+
+## 四、船员名册（Crew Manifest）
+
+全体 12 人。状态：**全部失联。**
+
+### 4.1 舰桥军官（Bridge Officers）
+
+| 姓名 | 职衔 | 背景 |
+|------|------|------|
+| **埃利亚斯·沃斯**（Cpt. Elias Voss） | 舰长 / 指挥官 | 47 岁，FSA 服役 22 年。参与过 3 次深空任务，以冷静果断著称。曾主导"曙光号"木卫二冰下海洋探测。出发前最后一次通讯中，声音平稳。 |
+| **田中优希**（Cmdr. Yuki Tanaka） | 中校 / 副舰长 | 39 岁，日裔。专精深空导航与轨道力学。是奥丁号的航线设计者。 |
+| **马库斯·陈**（Lt. Marcus Chen） | 上尉 / 导航官 | 31 岁，第三代太空移民。在最后通讯中第一个察觉到能量异常攀升。 |
+
+### 4.2 科学部门（Science Division）
+
+| 姓名 | 职衔 | 背景 |
+|------|------|------|
+| **阿玛拉·奥塞博士**（Dr. Amara Osei） | 首席科学家 | 42 岁，加纳裔。天体矿物学权威，FSA 首席材料科学顾问。在最后通讯中确认了矿石的"不可能"性质。 |
+| **尼古拉·彼得罗夫博士**（Dr. Nikolai Petrov） | 地质学家 | 55 岁，俄裔。太阳系小行星带采矿作业经验最丰富的地质学家。负责矿石的初步分类与采样方案设计。 |
+| **莱娜·伯格斯特龙博士**（Dr. Lena Bergstrom） | 异星生物学家 | 36 岁，瑞典裔。虽名为"异星生物学家"，实际受训背景涵盖非碳基化学与自组织系统——FSA 在任务规划时已考虑了"非生命但有序"的可能性。 |
+
+### 4.3 工程部门（Engineering）
+
+| 姓名 | 职衔 | 背景 |
+|------|------|------|
+| **大卫·朴**（Chief Eng. David Park） | 总工程师 / 推进系统 | 44 岁，韩裔。奥丁号推进系统的设计者之一。在应急情况下可手动越控反应堆。 |
+| **索菲亚·雷耶斯**（Eng. Sofia Reyes） | 工程师 / 系统 | 29 岁，墨西哥裔。全舰系统的神经中枢——结构传感器、生命维持、热控均由她监控。最后几秒的结构应力告警，她是第一个看到的人。 |
+| **维克托·霍尔姆**（Eng. Viktor Holm） | 工程师 / 能源网络 | 33 岁，瑞典裔。负责能源分配与护盾系统。在能量冲击面前，他的系统是第一道防线——也是第一道崩溃的防线。 |
+
+### 4.4 支援部门（Support）
+
+| 姓名 | 职衔 | 背景 |
+|------|------|------|
+| **普丽雅·卡普尔**（Med. Off. Priya Kapoor） | 医务官 | 34 岁，印度裔。深空医学专家，兼心理支持。是船员中唯一携带家庭相片上舰的人。 |
+| **詹姆斯·赖特**（Spec. James Wright） | 专员 / 通讯 | 27 岁，英裔。负责奥丁号与开普勒-9 的超光速中继通讯。他是最后一个试图发出信号的人。 |
+| **安雅·沃尔科夫**（Spec. Anya Volkov） | 专员 / 数据 | 26 岁，俄裔。负责所有遥测数据的记录、加密与归档。她留下的数据，是解开谜团的唯一线索。 |
+
+---
+
+## 五、最后通讯（Final Transmission）
+
+> 以下为舰桥音频自动转录。括号内为信号强度。
+
+```
+[04:17:09] — 信号强度 98% —
+沃斯舰长："那是什么读数？我要立刻看到全光谱分析。"
+
+[04:17:12] — 信号强度 91% —
+陈上尉："长官，能量输出在持续攀升——它停不下来。"
+
+[04:17:15] — 信号强度 84% —
+奥塞博士："这不可能。矿石在自主产生能量。没有任何外部能量源。"
+
+[04:17:18] — 信号强度 61% —
+沃斯舰长："全员注意，准备——"
+         [音频在此处截断]
+
+[04:17:22] — 信号强度 0% —
+<信号中断>
+```
+
+> ⚠ **备注：最后 3.2 秒音频已无法恢复。最终能量尖峰的来源仍然未知。**
+>
+> 事后分析表明，通讯中断并非由通讯设备故障导致——所有中继站在同一瞬间接收到了一股压倒性的全频段电磁脉冲，其能量级足以在 13 秒内摧毁奥丁号的舰体结构。
+
+---
+
+## 六、HADES-01 矿石档案
+
+### 6.1 基本信息
+
+| 属性 | 数值 |
+|------|------|
+| **样本代号** | HADES-01 |
+| **外观** | 不规则晶体簇结构，深黑基底上密布幽蓝渐变晶体 |
+| **来源坐标** | 第七星区 47.2, -118.6 |
+| **宿主天体直径** | 约 1.4 km |
+| **矿石密度** | 8.9 g/cm³ |
+| **晶格结构** | 不规则 |
+| **分子特性** | **自组织**——分子结构持续自我复制 |
+
+### 6.2 元素组成（光谱分析）
+
+| 成分 | 占比 | 来源 |
+|------|------|------|
+| 未知元素 A | 18.7% | **无地球/已知天体对应** |
+| 硅酸盐基质 | 34.2% | 常见矿物基底 |
+| 金属合金 | 15.3% | **奥丁号舰体合金成分**——说明矿石与舰体发生了接触后的化合反应 |
+| 未分类晶体 | 31.8% | 与任何已知晶体系统不匹配 |
+
+### 6.3 能量特性
+
+| 指标 | 数值 | 异常程度 |
+|------|------|----------|
+| 被动辐射 | 偏高 | ⚠ |
+| 能量输出 | 持续上升 | ⚠⚠ |
+| 峰值输出 | **基线 37 倍** | ⚠⚠⚠ |
+| 共振频率 | 未知 | ⚠⚠ |
+| 热特征 | 异常 | ⚠⚠ |
+
+**核心发现：** HADES-01 能够在没有任何外部能量输入的情况下持续输出热量。这直接违反了热力学第二定律。从已知物理学的角度看，这种物质"不应该存在"。
+
+### 6.4 四个关键扫描区
+
+1. **核心能量源（Scan Zone 01）**：矿石最亮的中心区域。能量密度为基线的 37 倍，分子结构持续自我复制。此处被认为是矿石"生长"的源头。能量输出违反已知热力学定律。
+
+2. **合金反应带（Scan Zone 02）**：矿石边缘发黑的区域。检测到与奥丁号舰体合金匹配的金属成分。矿石与金属接触后触发了未知化合反应——**这是舰体解体的直接原因**。矿石不是被爆炸摧毁的；它在接触舰体材料后，主动"吞噬"了合金。
+
+3. **断裂断面（Scan Zone 03）**：断面异常平整，非外力冲击形成。物理模拟表明，爆炸的起源方向是**从矿石内部向外**——矿石自身释放了能量冲击，而非外部爆炸波及矿石。
+
+4. **表面尘埃层（Scan Zone 04）**：覆盖在矿石表面的微粒来自舰体爆炸残留。值得注意的异常：下方晶体在无外界能量输入的情况下持续发光。
+
+### 6.5 风险等级
+
+| 项目 | 评级 |
+|------|------|
+| 接触危险等级 | **3 级**（需全封闭防护） |
+| 生物活性 | 未测试 |
+| 能量约束 | **失效中**——矿石仍在释放能量 |
+| 正式分类 | 待定 |
+| 隔离协议 | **已启动**——禁止未授权接触 |
+
+### 6.6 起源假说
+
+FSA 内部存在三种主流假说：
+
+1. **非地球起源说（主流）**：该物质来自一颗已毁灭的地外行星内核，在超新星冲击等极端条件下形成。但这一假说无法解释其自持能量特性。
+
+2. **人造起源说（少数）**：该物质是某种远古外星文明的造物，具备自我维持的能量核心。如果是这样，那么它在深空漂浮了极其漫长的时间。
+
+3. **额外维度起源说（激进）**：该物质不属于我们所在的四维时空，而是来自更高维度的"投影"。它的能量来源不在我们的宇宙之内——这才是它违反热力学定律的真正原因。
+
+> 目前 FSA 未就任何假说达成共识。
+
+---
+
+## 七、事故分析与争议
+
+### 7.1 官方结论 vs 真相
+
+| | 官方报告 | 遥测数据揭示 |
+|------|----------|-------------|
+| **事故原因** | 引擎核心过载 | 外部能量源冲击 |
+| **能量源点** | 舰体内部 | 矿石沉积体 |
+| **矿石性质** | 未特别说明 | 自主产能，违反热力学 |
+| **能量峰值** | 未公布 | 基线的 3700% |
+| **通讯中断** | 设备故障 | 全频段电磁脉冲 |
+
+### 7.2 被掩盖的事实
+
+1. **能量源点来自矿石，而非舰体**。从残骸区域回收的遥测数据证明，能量冲击的起源点位于矿石中心，向外辐射，不是舰体引擎。
+
+2. **矿石与舰体合金发生了化合反应**。HADES-01 表面检测到大量奥丁号舰体合金成分——矿石在爆炸前就已经"侵蚀"了舰体材料。
+
+3. **矿石至今仍在释放能量**。即便在回收后，样本 HADES-01 仍无需任何外部输入即可持续发光和释热。
+
+4. **最后通讯被截断的最后 3.2 秒**至今无法恢复。这段缺失的音频里，可能藏着整个事件的真正原因。
+
+### 7.3 为什么被压下
+
+FSA 的理由并不复杂：如果公众知道在第七星区存在一种**能自主产能、能"吞噬"金属、能在 13 秒内摧毁一艘奥丁级勘探舰**的未知物质——整个深空探测计划将面临全面停摆。而 FSA 的长期战略中，第七星区并非终点，而是通往更远星域的跳板。
+
+---
+
+## 八、人员档案补遗
+
+### 8.1 沃斯舰长（Cpt. Elias Voss）
+
+沃斯是那种"每次出任务都写好遗书"的舰长。他的个人习惯是从不谈论"回家以后"——在深空服役 22 年，他明白概率。
+
+他的最后一道命令 "All hands, brace for —" 没有说完。通讯记录分析小组推测，"brace for" 后面最可能的词是 **"impact"**（冲击）或 **"containment breach"**（约束失效）。无论哪个，他都知道那一刻已经来了。
+
+### 8.2 奥塞博士（Dr. Amara Osei）
+
+奥塞博士是地球上最熟悉矿物学的人。她见过太阳系每一种已知岩石——冰卫星上的甲烷冰、小行星带的镍铁陨铁、火星的赤铁矿结核。但当她看到 HADES-01 的光谱时，她说了四个字：**"这不可能。"**
+
+一个科学家说"不可能"，意思是："我所知道的一切物理规则，都不允许这个东西存在。"
+
+### 8.3 詹姆斯·赖特（Spec. James Wright）
+
+27 岁的赖特是船上最年轻的成员之一，负责奥丁号与开普勒-9 的超光速中继通讯。在通讯中断的瞬间，他的控制台上会闪过什么——没有人知道。但后续分析表明，中继站在同一时刻接收到的不是正常的载波信号，而是一股压倒性的、宛若尖啸的全频段电磁脉冲。
+
+如果赖特在最后一秒看到了什么，它没有来得及变成信号到达地球。
+
+### 8.4 田中优希（Cmdr. Yuki Tanaka）
+
+田中是奥丁号的航线设计者和导航灵魂。她的专业领域是轨道力学——计算一段航程需要多少燃料、以怎样的角度切入星区、在哪里借助哪颗恒星的引力甩摆加速。她为这次任务设计了从开普勒-9 到第七星区的最优航线，节省了 11% 的航行时间。
+
+讽刺的是，正是她计算出的这条"最优航线"，让奥丁号比预计提前 3 天抵达了目标坐标——也提前 3 天遭遇了那个将吞噬所有人的东西。
+
+---
+
+## 九、世界观设定细节汇总
+
+### 9.1 技术术语
+
+| 术语 | 定义 |
+|------|------|
+| **SX-9000 光谱分析仪** | 奥丁号搭载的主力科学仪器，可分析从红外到伽马射线的全频段辐射 |
+| **超光速中继通讯** | 基于量子纠缠原理的超距通讯系统，可实现奥丁号与开普勒-9 之间的跨光年实时数据传输 |
+| **Protocol Omega（欧米茄协议）** | FSA 搜救中止标准协议：深空任务失联后 72 小时内若无信号恢复、无碎片追踪线索，则中止搜救 |
+| **4 级安全许可** | FSA 最高密级。只有局长和指定委员会成员有权阅览完整档案 |
+| **全频段电磁脉冲** | 覆盖所有已知频率的毁灭性电磁辐射爆发，最后通讯中断的推定原因 |
+
+### 9.2 机构关系
+
+```
+联邦航天局 (FSA)
+    │
+    ├── 深空行动中心 (DSOC) — 3级及以上任务规划
+    │       │
+    │       ├── 开普勒-9 轨道站 — 观测阵列 + 出发/中继
+    │       │       │
+    │       │       └── 奥丁号 NX-724 — 深空任务 724
+    │       │
+    │       └── 哈迪斯计划 (PROJECT HADES)
+    │
+    └── 事故调查委员会 — 2187 年奥丁号失联调查
+            │
+            ├── 公开结论：引擎过载
+            └── 加密附录：能量源异常（HADES-01）
+```
+
+### 9.3 叙事主题
+
+哈迪斯计划的故事围绕三个核心主题展开：
+
+1. **未知的代价**：人类探索深空的每一步，都可能踩到我们无法理解的东西。奥丁号撞上的不是一颗小行星或一团星云——它撞上了一个物理学的边界。
+
+2. **真相与谎言**：FSA 对外公布"引擎故障"，对内加密封锁矿石数据。那 12 个人的家人至今不知道他们真正面对的是什么。
+
+3. **矿石是什么**：它不是矿物。它是某种我们尚未获得词汇去描述的东西。它活着——以自己的方式；它杀人——也许是出于防卫，也许是出于饥饿。
+
+---
+
+## 十、叙事可用钩子（续写方向）
+
+本档案目前停留在"事故调查"阶段。以下是可供展开的叙事方向：
+
+1. **后续任务**：FSA 是否派出了第二艘勘探舰？如果去了，结果如何？
+2. **矿石异变**：回收的 HADES-01 样本仍在释放能量。它会停止吗？还是会加速？
+3. **沃斯遗言**：那丢失的 3.2 秒音频是否可以用新技术恢复？恢复后会听到什么？
+4. **幸存者**：12 名船员中，是否有人没有"失联"——而是被矿石以某种方式"转化"了？
+5. **非人类接触**：矿石具备自主产能和自组织分子结构——它是否具有意识？它是在"反应"，还是在"交流"？
+6. **扩散风险**：如果矿石能通过接触金属扩散，那它是否已经在第七星区之外出现了？
+
+---
+
+> *"The cosmos remembers what time forgets. This is the story of what endures in the void."*
+>
+> ——深空档案馆馆藏引言
+
+---
+
+**文件编制日期：2192.06.01（解密日）**
+**编制机构：联邦航天局深空行动中心档案部**
+**原始分类：4 级密级**
+**本副本密级：已解密（含删节）**
+
+</script>
+
+<!-- ========== 第一页 ========== -->
+<div class="page p1" id="page1">
+  <video class="video-bg" id="bgVideo" autoplay muted loop playsinline src="assets/深空巨舰.mp4" poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080'%3E%3Crect fill='%23020816' width='1920' height='1080'/%3E%3C/svg%3E"></video>
+  <div class="vignette"></div>
+  <div class="top-fade"></div>
+  <div class="bottom-fade"></div>
+  <div class="radial-overlay"></div>
+
+  <div class="p1-ui">
+    <!-- 左上 Logo -->
+    <div class="brand-wrap">
+      <div class="brand" data-i18n="brand">PROJECT HADES<sup>&#x25C6;</sup></div>
+      <div class="tagline" data-i18n="tagline">CONFIDENTIAL &middot; DEEP SPACE ARCHIVE</div>
+    </div>
+
+    <!-- 右上导航 -->
+    <nav class="nav">
+      <a href="#" class="active" data-i18n="nav-home">HOME</a>
+      <a data-panel="mission" data-i18n="nav-mission">MISSION LOG</a>
+      <a data-panel="crew" data-i18n="nav-crew">CREW MANIFEST</a>
+      <a data-panel="transmission" data-i18n="nav-transmission">FINAL TRANSMISSION</a>
+      <a data-panel="contact" data-i18n="nav-contact">CONTACT</a>
+      <a id="navLore" data-i18n="nav-lore">LORE</a>
+      <span class="search" id="searchTrigger">&#x2315;</span>
+    </nav>
+
+    <!-- 中央主标题 -->
+    <div class="hero">
+      <h1 data-i18n="hero-title" data-after="CONTACT LOST">CONTACT LOST</h1>
+      <div class="vol" data-i18n="hero-sub">USSV ODIN &middot; SECTOR-7 &middot; 2187.03.14</div>
+    </div>
+
+    <!-- 左侧标题块 -->
+    <div class="report-block">
+      <div class="report-label" data-i18n="report-label">INCIDENT BRIEFING:</div>
+      <div class="report-title" data-i18n-html="report-title">DEEP SPACE MISSION<br>NX-724</div>
+      <div class="body-wrap">
+        <div class="report-body" id="reportBody">
+          <div class="scroll" id="reportScroll"></div>
+        </div>
+      </div>
+      <a class="read-btn" id="openDrawer" data-i18n="read-btn">VIEW FINAL TRANSMISSION</a>
+    </div>
+
+    <!-- 右下活动信息 -->
+    <div class="event-block">
+      <div class="event-label" data-i18n="event-label">LAST TRANSMISSION:</div>
+      <div class="event-name" data-i18n-html="event-name">Signal lost at 04:17:22<br>12 crew members &middot; unaccounted for</div>
+    </div>
+
+    <!-- 右侧竖排小字 -->
+    <div class="vert-side" data-i18n="vert-side">DEEP SPACE MISSION 724 &middot; CLEARANCE LEVEL 4</div>
+  </div>
+</div>
+
+<!-- ========== 第二页 ========== -->
+<div class="page p2" id="page2">
+  <div class="art-bg"></div>
+  <div class="stardust-dots" id="stardust"></div>
+  <div class="mask-layer" id="maskLayer"></div>
+  <div class="top-fade"></div>
+
+  <!-- 矿石扫描热点 -->
+  <div class="hotspot fade-in" id="hotspot1" style="left:42%;top:55%;">
+    <div class="hotspot-dot"></div>
+    <div class="hotspot-card" id="hotspot1Card">
+      <h4 data-i18n="hotspot1-title">SCAN ZONE 01 &middot; CORE ENERGY SOURCE</h4>
+      <p data-i18n="hotspot1-text">Energy density at 37x baseline. Molecular structure continuously self-replicating. Suspected origin point of mineral growth &mdash; energy output violates known thermodynamics.</p>
+    </div>
+  </div>
+  <div class="hotspot fade-in" id="hotspot2" style="left:65%;top:72%;">
+    <div class="hotspot-dot"></div>
+    <div class="hotspot-card" id="hotspot2Card">
+      <h4 data-i18n="hotspot2-title">SCAN ZONE 02 &middot; ALLOY REACTION ZONE</h4>
+      <p data-i18n="hotspot2-text">Detected hull alloy composition matching USSV Odin. Mineral contact triggered unknown chemical bonding reaction &mdash; this region is the direct cause of structural disintegration.</p>
+    </div>
+  </div>
+
+  <div class="p2-ui">
+    <div class="vert-left fade-in" data-i18n="vert-left">DEEP SCAN PROTOCOL &middot; ACTIVE</div>
+
+    <div class="art-title fade-in" id="artTitle"></div>
+    <div class="art-sub fade-in" data-i18n="art-sub">Unknown crystalline structure &middot; origin unconfirmed</div>
+
+    <div class="p2blocks fade-in" id="scanDataBlocks"></div>
+
+    <button class="explore fade-in" id="downloadBtn" data-i18n="download-btn">DOWNLOAD SCAN DATA</button>
+  </div>
+</div>
+
+<!-- ========== 导航面板：MISSION LOG ========== -->
+<div class="panel-overlay" id="panelOverlay"></div>
+<div class="panel" id="panelMission">
+  <button class="panel-close" data-close>&#x2715;</button>
+  <h2 data-i18n="panel-mission-h2">MISSION LOG</h2>
+  <div class="source-note" data-i18n="mission-source">&#x25B6; Source: USSV Odin onboard black box auto-transcription system. Recovered from Sector-7 debris field, 2187.04.02.</div>
+  <div class="log-entry"><span class="log-time">2187.02.18</span> <span data-i18n="mission-log-1">Odin-class vessel NX-724 cleared for departure from orbiting station Kepler-9.</span></div>
+  <div class="log-entry"><span class="log-time">2187.03.02</span> <span data-i18n="mission-log-2">Entered Sector-7. Long-range sensors detected faint but persistent energy anomaly.</span></div>
+  <div class="log-entry"><span class="log-time">2187.03.10</span> <span data-i18n="mission-log-3">Anomaly localized to coordinates 47.2, -118.6. Course adjusted for approach.</span></div>
+  <div class="log-entry"><span class="log-time">2187.03.14 04:12</span> <span data-i18n="mission-log-4">Visual contact confirmed. Initial spectrography indicates unknown mineral composition &mdash; no match in Federation database.</span></div>
+  <div class="log-entry"><span class="log-time">2187.03.14 04:17</span> <span data-i18n="mission-log-5">Energy spike detected. Hull sensors report structural stress across all sections. Last transmission received.</span></div>
+  <div class="log-entry"><span class="log-time">2187.03.14 04:17:22</span> <span data-i18n="mission-log-6">SIGNAL LOST. All subsequent contact attempts failed.</span></div>
+  <div class="classified" data-i18n="mission-classified">&#x26D4; CLASSIFIED: Official cause listed as engine failure. Energy source anomaly omitted from public report.</div>
+</div>
+
+<!-- ========== 导航面板：CREW MANIFEST ========== -->
+<div class="panel" id="panelCrew">
+  <button class="panel-close" data-close>&#x2715;</button>
+  <h2 data-i18n="panel-crew-h2">CREW MANIFEST</h2>
+  <h3 data-i18n="crew-bridge">Bridge Officers</h3>
+  <div class="crew-list" id="crewBridge"></div>
+  <h3 data-i18n="crew-science">Science Division</h3>
+  <div class="crew-list" id="crewScience"></div>
+  <h3 data-i18n="crew-engineering">Engineering</h3>
+  <div class="crew-list" id="crewEngineering"></div>
+  <h3 data-i18n="crew-support">Support</h3>
+  <div class="crew-list" id="crewSupport"></div>
+  <div class="classified" data-i18n="crew-classified">&#x26D4; STATUS: All 12 crew members remain unaccounted for. Search and rescue operation suspended after 72 hours per Protocol Omega.</div>
+</div>
+
+<!-- ========== 导航面板：FINAL TRANSMISSION ========== -->
+<div class="panel" id="panelTx">
+  <button class="panel-close" data-close>&#x2715;</button>
+  <h2 data-i18n="panel-tx-h2">FINAL TRANSMISSION</h2>
+  <div class="log-entry"><span class="log-time">04:17:08</span> <span data-i18n="tx-intro">Automated transcription of bridge audio &mdash; USSV Odin</span></div>
+  <div class="typewriter" id="typewriterTx"></div>
+  <div class="classified" style="margin-top:20px" data-i18n="tx-classified">&#x26D4; NOTE: Last 3.2 seconds of audio degraded beyond recovery. Source of final energy spike remains UNKNOWN.</div>
+</div>
+
+<!-- ========== 导航面板：CONTACT ========== -->
+<div class="panel" id="panelContact">
+  <button class="panel-close" data-close>&#x2715;</button>
+  <h2 data-i18n="panel-contact-h2">CONTACT</h2>
+  <p data-i18n="contact-p1">Federal Space Administration &mdash; Deep Space Operations Center</p>
+  <p data-i18n="contact-p2">Archive Access: Level 4 clearance required for full mission records.</p>
+  <p data-i18n="contact-p3">All inquiries regarding PROJECT HADES must be submitted via encrypted channels.</p>
+  <div class="classified" data-i18n="contact-classified">&#x26D4; This document is property of the FSA. Unauthorized access is subject to prosecution under Article 47 of the Deep Space Operations Act.</div>
+</div>
+
+<!-- ========== 左侧抽屉：事故报告 ========== -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<div class="drawer" id="incidentDrawer">
+  <button class="drawer-close" id="drawerClose">&#x2715;</button>
+  <h2 data-i18n="drawer-h2">INCIDENT REPORT: NX-724</h2>
+  <div class="stamp" data-i18n="drawer-stamp">DECLASSIFIED &mdash; 2192.06.01</div>
+  <p data-i18n="drawer-p1">The USSV Odin was dispatched to Sector-7 on a classified mineral survey operation following anomalous energy readings detected by deep-space observatory array Kepler-9. Mission parameters were strictly observational: locate, identify, and report.</p>
+  <p data-i18n="drawer-p2">Upon approach to the target coordinates, the vessel's spectrographic instruments registered a previously uncatalogued crystalline mineral structure. Initial readings indicated self-sustaining energy output &mdash; a physical impossibility under known thermodynamic laws.</p>
+
+  <div class="specs">
+    <div class="spec-item">
+      <div class="spec-label" data-i18n="spec-coord-label">TARGET COORDINATES</div>
+      <div class="spec-value">47.2&deg;, -118.6&deg;</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-label" data-i18n="spec-mineral-label">MINERAL DESIGNATION</div>
+      <div class="spec-value">HADES-01</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-label" data-i18n="spec-energy-label">ENERGY PEAK</div>
+      <div class="spec-value" data-i18n="spec-energy-val">3700% baseline</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-label" data-i18n="spec-casualties-label">CASUALTIES</div>
+      <div class="spec-value" data-i18n="spec-casualties-val">12 unaccounted</div>
+    </div>
+  </div>
+
+  <p data-i18n="drawer-p3">At 04:17:09, an uncontrolled energy discharge originated from the mineral sample. Hull integrity sensors registered catastrophic failure across all sections within 13 seconds. No distress signal was received by orbiting relay stations.</p>
+  <p data-i18n="drawer-p4">The official incident report attributes the loss to "engine core overload." However, telemetry data recovered from the debris field indicates the energy origin point was external &mdash; centered on the unknown mineral deposit. This finding has been classified at the highest level.</p>
+  <div class="classified" data-i18n="drawer-classified">&#x26D4; REDACTED: Energy source classification pending further analysis of recovered sample HADES-01.</div>
+</div>
+
+<!-- ========== 下载扫描数据弹窗 ========== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-card">
+    <button class="close-btn" id="modalClose">&#x2715;</button>
+    <h2 data-i18n="modal-h2">SAMPLE: HADES-01 &mdash; SPECTRAL ANALYSIS</h2>
+
+    <div class="section" data-i18n="modal-spectrum-label">ENERGY OUTPUT SPECTRUM (RELATIVE INTENSITY)</div>
+    <div class="chart" id="energyChart">
+      <div class="chart-bar" data-h="18%" style="left:8%;width:8%;background:linear-gradient(to top,rgba(100,160,255,0.4),rgba(100,160,255,0.1))"></div>
+      <div class="chart-bar" data-h="25%" style="left:19%;width:8%;background:linear-gradient(to top,rgba(100,170,255,0.5),rgba(100,170,255,0.15))"></div>
+      <div class="chart-bar" data-h="22%" style="left:30%;width:8%;background:linear-gradient(to top,rgba(100,165,255,0.4),rgba(100,165,255,0.1))"></div>
+      <div class="chart-bar" data-h="35%" style="left:41%;width:8%;background:linear-gradient(to top,rgba(110,180,255,0.5),rgba(110,180,255,0.15))"></div>
+      <div class="chart-bar" data-h="68%" style="left:52%;width:8%;background:linear-gradient(to top,rgba(120,200,255,0.6),rgba(120,200,255,0.2))"></div>
+      <div class="chart-bar" data-h="92%" style="left:63%;width:8%;background:linear-gradient(to top,rgba(130,220,255,0.75),rgba(130,220,255,0.25))"></div>
+      <div class="chart-bar" data-h="57%" style="left:74%;width:8%;background:linear-gradient(to top,rgba(115,195,255,0.55),rgba(115,195,255,0.18))"></div>
+      <div class="chart-bar" data-h="40%" style="left:85%;width:8%;background:linear-gradient(to top,rgba(105,175,255,0.45),rgba(105,175,255,0.12))"></div>
+    </div>
+
+    <div class="section" data-i18n="modal-elem-label">ELEMENTAL COMPOSITION</div>
+    <div class="value" data-i18n="modal-elem-val">Unknown Element A: 18.7% | Silicate matrix: 34.2% | Metallic alloy (ship origin): 15.3% | Unclassified crystalline: 31.8%</div>
+
+    <div class="section" data-i18n="modal-thermal-label">THERMAL ANALYSIS</div>
+    <div class="value" data-i18n="modal-thermal-val">Continuous heat output detected. No external energy input required. Pattern violates second law of thermodynamics. Classification: UNKNOWN REACTION.</div>
+
+    <div class="section" data-i18n="modal-origin-label">ORIGIN HYPOTHESIS</div>
+    <div class="value" data-i18n="modal-origin-val">No known natural or synthetic process matches observed properties. Leading theory: non-terrestrial origin, possibly extra-dimensional.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var root = document.documentElement;
+  var page1 = document.getElementById('page1');
+  var page2 = document.getElementById('page2');
+  var bgVideo = document.getElementById('bgVideo');
+  var maskLayer = document.getElementById('maskLayer');
+  var artTitle = document.getElementById('artTitle');
+  var downloadBtn = document.getElementById('downloadBtn');
+  var stardust = document.getElementById('stardust');
+  var langToggle = document.getElementById('langToggle');
+
+  // ==================== I18N 词典 ====================
+  var I18N = {
+    // 搜索
+    'search-placeholder':{en:'Search archive...',cn:'搜索档案...'},
+    'search-shortcut':{en:'PRESS / TO SEARCH',cn:'按 / 键搜索'},
+    'search-empty':{en:'No records match your query.',cn:'没有匹配的档案记录。'},
+    'search-hint-mission':{en:'mission',cn:'任务'},
+    'search-hint-crew':{en:'crew',cn:'船员'},
+    'search-hint-mineral':{en:'mineral',cn:'矿石'},
+    'search-hint-energy':{en:'energy',cn:'能量'},
+
+    // 第一页
+    brand:           {en:'PROJECT HADES',cn:'哈迪斯计划'},
+    tagline:         {en:'CONFIDENTIAL \u00b7 DEEP SPACE ARCHIVE',cn:'绝密 \u00b7 深空档案馆'},
+    'nav-home':      {en:'HOME',cn:'首页'},
+    'nav-mission':   {en:'MISSION LOG',cn:'任务日志'},
+    'nav-crew':      {en:'CREW MANIFEST',cn:'船员名册'},
+    'nav-transmission':{en:'FINAL TRANSMISSION',cn:'最后通讯'},
+    'nav-contact':   {en:'CONTACT',cn:'联络'},
+    'nav-lore':      {en:'LORE',cn:'世界观'},
+    'hero-title':    {en:'CONTACT LOST',cn:'信号中断'},
+    'hero-sub':      {en:'USSV ODIN \u00b7 SECTOR-7 \u00b7 2187.03.14',cn:'奥丁号 \u00b7 第七星区 \u00b7 2187.03.14'},
+    'report-label':  {en:'INCIDENT BRIEFING:',cn:'事故简报：'},
+    'report-title':  {en:'DEEP SPACE MISSION<br>NX-724',cn:'深空任务<br>NX-724'},
+    'read-btn':      {en:'VIEW FINAL TRANSMISSION',cn:'查看最后通讯'},
+    'event-label':   {en:'LAST TRANSMISSION:',cn:'最后通讯：'},
+    'event-name':    {en:'Signal lost at 04:17:22<br>12 crew members \u00b7 unaccounted for',cn:'信号于 04:17:22 中断<br>12 名船员 \u00b7 全部失联'},
+    'vert-side':     {en:'DEEP SPACE MISSION 724 \u00b7 CLEARANCE LEVEL 4',cn:'深空任务 724 \u00b7 4 级密级'},
+
+    // 第二页
+    'vert-left':     {en:'DEEP SCAN PROTOCOL \u00b7 ACTIVE',cn:'深度扫描协议 \u00b7 运行中'},
+    'art-title':     {en:'SAMPLE: HADES-01',cn:'样本：HADES-01'},
+    'art-sub':       {en:'Unknown crystalline structure \u00b7 origin unconfirmed',cn:'未知晶体结构 \u00b7 来源未确认'},
+    'download-btn':  {en:'DOWNLOAD SCAN DATA',cn:'下载扫描数据'},
+
+    // 热点
+    'hotspot1-title':{en:'SCAN ZONE 01 \u00b7 CORE ENERGY SOURCE',cn:'扫描区 01 \u00b7 核心能量源'},
+    'hotspot1-text': {en:'Energy density at 37x baseline. Molecular structure continuously self-replicating. Suspected origin point of mineral growth \u2014 energy output violates known thermodynamics.',
+                      cn:'能量密度为基线的 37 倍。分子结构持续自我复制。疑似矿石生长的起源点——能量输出违反已知热力学定律。'},
+    'hotspot2-title':{en:'SCAN ZONE 02 \u00b7 ALLOY REACTION ZONE',cn:'扫描区 02 \u00b7 合金反应带'},
+    'hotspot2-text': {en:'Detected hull alloy composition matching USSV Odin. Mineral contact triggered unknown chemical bonding reaction \u2014 this region is the direct cause of structural disintegration.',
+                      cn:'检测到与奥丁号匹配的舰体合金成分。矿石接触触发了未知化合反应——该区域是舰体结构解体的直接原因。'},
+
+    // 面板 — 任务日志
+    'panel-mission-h2':{en:'MISSION LOG',cn:'任务日志'},
+    'mission-source':{en:'\u25B6 Source: USSV Odin onboard black box auto-transcription system. Recovered from Sector-7 debris field, 2187.04.02.',cn:'\u25B6 \u6765\u6E90\uFF1A\u5965\u4E01\u53F7\u8230\u8F7D\u9ED1\u5323\u5B50\u81EA\u52A8\u8F6C\u5F55\u7CFB\u7EDF\u3002\u4E8E 2187.04.02 \u4ECE\u7B2C\u4E03\u661F\u533A\u6B8B\u9AB8\u5E26\u6253\u635E\u56DE\u6536\u3002'},
+    'mission-log-1':{en:'Odin-class vessel NX-724 cleared for departure from orbiting station Kepler-9.',cn:'奥丁级勘探舰 NX-724 获准从轨道站开普勒-9 出发。'},
+    'mission-log-2':{en:'Entered Sector-7. Long-range sensors detected faint but persistent energy anomaly.',cn:'进入第七星区。远程传感器探测到微弱但持续的能量异常。'},
+    'mission-log-3':{en:'Anomaly localized to coordinates 47.2, -118.6. Course adjusted for approach.',cn:'异常信号定位于坐标 47.2, -118.6。调整航线抵近。'},
+    'mission-log-4':{en:'Visual contact confirmed. Initial spectrography indicates unknown mineral composition \u2014 no match in Federation database.',cn:'视觉接触确认。初步光谱分析显示未知矿物成分——联邦数据库中无匹配记录。'},
+    'mission-log-5':{en:'Energy spike detected. Hull sensors report structural stress across all sections. Last transmission received.',cn:'检测到能量尖峰。舰体传感器报告各段结构应力异常。收到最后通讯。'},
+    'mission-log-6':{en:'SIGNAL LOST. All subsequent contact attempts failed.',cn:'信号中断。此后所有联络尝试均失败。'},
+    'mission-classified':{en:'\u26D4 CLASSIFIED: Official cause listed as engine failure. Energy source anomaly omitted from public report.',
+                          cn:'\u26D4 机密：官方原因为引擎故障。能量源异常未列入公开报告。'},
+
+    // 面板 — 船员
+    'panel-crew-h2': {en:'CREW MANIFEST',cn:'船员名册'},
+    'crew-bridge':   {en:'Bridge Officers',cn:'舰桥军官'},
+    'crew-science':  {en:'Science Division',cn:'科学部门'},
+    'crew-engineering':{en:'Engineering',cn:'工程部门'},
+    'crew-support':  {en:'Support',cn:'支援部门'},
+    'crew-missing':  {en:'MISSING',cn:'失联'},
+    'crew-classified':{en:'\u26D4 STATUS: All 12 crew members remain unaccounted for. Search and rescue operation suspended after 72 hours per Protocol Omega.',
+                       cn:'\u26D4 状态：12 名船员全部下落不明。根据欧米茄协议，搜救行动于 72 小时后中止。'},
+
+    // 面板 — 最后通讯
+    'panel-tx-h2':   {en:'FINAL TRANSMISSION',cn:'最后通讯'},
+    'tx-intro':      {en:'Automated transcription of bridge audio \u2014 USSV Odin',cn:'舰桥音频自动转录 \u2014 奥丁号'},
+    'tx-classified': {en:'\u26D4 NOTE: Last 3.2 seconds of audio degraded beyond recovery. Source of final energy spike remains UNKNOWN.',
+                       cn:'\u26D4 备注：最后 3.2 秒音频已无法恢复。最终能量尖峰来源仍然未知。'},
+
+    // 面板 — 联络
+    'panel-contact-h2':{en:'CONTACT',cn:'联络信息'},
+    'contact-p1':    {en:'Federal Space Administration \u2014 Deep Space Operations Center',cn:'联邦航天局 \u2014 深空行动中心'},
+    'contact-p2':    {en:'Archive Access: Level 4 clearance required for full mission records.',cn:'档案访问：完整任务记录需 4 级安全许可。'},
+    'contact-p3':    {en:'All inquiries regarding PROJECT HADES must be submitted via encrypted channels.',cn:'所有关于哈迪斯计划的查询须通过加密渠道提交。'},
+    'contact-classified':{en:'\u26D4 This document is property of the FSA. Unauthorized access is subject to prosecution under Article 47 of the Deep Space Operations Act.',
+                           cn:'\u26D4 本文件为联邦航天局财产。未经授权访问将依据《深空行动法》第 47 条予以追诉。'},
+
+    // 抽屉 — 事故报告
+    'drawer-h2':     {en:'INCIDENT REPORT: NX-724',cn:'事故报告：NX-724'},
+    'drawer-stamp':  {en:'DECLASSIFIED \u2014 2192.06.01',cn:'已解密 \u2014 2192.06.01'},
+    'drawer-p1':     {en:'The USSV Odin was dispatched to Sector-7 on a classified mineral survey operation following anomalous energy readings detected by deep-space observatory array Kepler-9. Mission parameters were strictly observational: locate, identify, and report.',
+                       cn:'奥丁号奉命前往第七星区执行机密矿石勘测任务，此前深空观测阵列开普勒-9 探测到异常能量读数。任务参数严格限于观测性质：定位、识别并报告。'},
+    'drawer-p2':     {en:'Upon approach to the target coordinates, the vessel\'s spectrographic instruments registered a previously uncatalogued crystalline mineral structure. Initial readings indicated self-sustaining energy output \u2014 a physical impossibility under known thermodynamic laws.',
+                       cn:'抵近目标坐标时，舰艇光谱仪器记录到一种此前未被编目的晶体矿石结构。初始读数显示其具有自持能量输出——这在已知热力学定律下是不可能的。'},
+    'drawer-p3':     {en:'At 04:17:09, an uncontrolled energy discharge originated from the mineral sample. Hull integrity sensors registered catastrophic failure across all sections within 13 seconds. No distress signal was received by orbiting relay stations.',
+                       cn:'04:17:09，矿石样本释放了不受控的能量冲击。舰体完整性传感器在 13 秒内记录到各段发生灾难性故障。轨道中继站未收到任何遇险信号。'},
+    'drawer-p4':     {en:'The official incident report attributes the loss to "engine core overload." However, telemetry data recovered from the debris field indicates the energy origin point was external \u2014 centered on the unknown mineral deposit. This finding has been classified at the highest level.',
+                       cn:'官方事故报告将舰艇损失归因于"引擎核心过载"。然而，从残骸区域回收的遥测数据表明，能量源点是外部的——集中在该未知矿石沉积体上。该发现已被列为最高密级。'},
+    'drawer-classified':{en:'\u26D4 REDACTED: Energy source classification pending further analysis of recovered sample HADES-01.',
+                         cn:'\u26D4 已删节：能量源分类需待回收样本 HADES-01 的进一步分析。'},
+
+    // 规格标签
+    'spec-coord-label':{en:'TARGET COORDINATES',cn:'目标坐标'},
+    'spec-mineral-label':{en:'MINERAL DESIGNATION',cn:'矿石代号'},
+    'spec-energy-label':{en:'ENERGY PEAK',cn:'能量峰值'},
+    'spec-energy-val':{en:'3700% baseline',cn:'基线的 3700%'},
+    'spec-casualties-label':{en:'CASUALTIES',cn:'伤亡人数'},
+    'spec-casualties-val':{en:'12 unaccounted',cn:'12 人失联'},
+
+    // 弹窗
+    'modal-h2':      {en:'SAMPLE: HADES-01 \u2014 SPECTRAL ANALYSIS',cn:'样本：HADES-01 \u2014 光谱分析'},
+    'modal-spectrum-label':{en:'ENERGY OUTPUT SPECTRUM (RELATIVE INTENSITY)',cn:'能量输出光谱（相对强度）'},
+    'modal-elem-label':{en:'ELEMENTAL COMPOSITION',cn:'元素组成'},
+    'modal-elem-val':{en:'Unknown Element A: 18.7% | Silicate matrix: 34.2% | Metallic alloy (ship origin): 15.3% | Unclassified crystalline: 31.8%',
+                       cn:'未知元素 A：18.7% | 硅酸盐基质：34.2% | 金属合金（舰体来源）：15.3% | 未分类晶体：31.8%'},
+    'modal-thermal-label':{en:'THERMAL ANALYSIS',cn:'热力学分析'},
+    'modal-thermal-val':{en:'Continuous heat output detected. No external energy input required. Pattern violates second law of thermodynamics. Classification: UNKNOWN REACTION.',
+                          cn:'检测到持续热量输出。无需外部能量输入。该模式违反热力学第二定律。分类：未知反应。'},
+    'modal-origin-label':{en:'ORIGIN HYPOTHESIS',cn:'起源假说'},
+    'modal-origin-val':{en:'No known natural or synthetic process matches observed properties. Leading theory: non-terrestrial origin, possibly extra-dimensional.',
+                         cn:'已知的自然或合成过程均无法匹配观察到的性质。主流理论：非地球起源，可能来自额外维度。'}
+  };
+
+  // 扫描数据三列
+  var scanDataI18n = {
+    col1: [
+      {en:'Crystalline lattice: irregular',cn:'晶格结构：不规则'},
+      {en:'Unknown element: 18.7%',cn:'未知元素：18.7%'},
+      {en:'Density: 8.9 g/cm\u00b3',cn:'密度：8.9 g/cm\u00b3'},
+      {en:'Self-organizing structure',cn:'自组织分子结构'},
+      {en:'No matching spectral record',cn:'无可匹配光谱记录'}
+    ],
+    header1: {en:'COMPOSITION ANALYSIS',cn:'物质分析'},
+    col2: [
+      {en:'Passive radiation: elevated',cn:'被动辐射：偏高'},
+      {en:'Energy output: rising',cn:'能量输出：持续上升'},
+      {en:'Peak output: 37x baseline',cn:'峰值输出：基线 37 倍'},
+      {en:'Resonance freq: unknown',cn:'共振频率：未知'},
+      {en:'Thermal signature: anomalous',cn:'热特征：异常'}
+    ],
+    header2: {en:'ENERGY READINGS',cn:'能量读数'},
+    col3: [
+      {en:'Contact hazard: level 3',cn:'接触危险等级：3'},
+      {en:'Bio-reactivity: untested',cn:'生物活性：未测试'},
+      {en:'Energy containment: failing',cn:'能量约束：失效中'},
+      {en:'Classification: pending',cn:'分类：待定'},
+      {en:'Quarantine protocol: active',cn:'隔离协议：已启动'}
+    ],
+    header3: {en:'RISK ASSESSMENT',cn:'风险评估'}
+  };
+
+  // 船员列表
+  var crewI18n = {
+    bridge: [
+      {name:{en:'Cpt. Elias Voss \u2014 Commanding Officer',cn:'舰长 埃利亚斯·沃斯 \u2014 指挥官'},note:{en:'His locker contained an unsealed letter addressed to his daughter on Earth. \u2014 Post-Mortem Inventory',cn:'他的储物柜里有一封未封口的信，收件人是他在地球的女儿。\u2014\u2014事后清查记录'}},
+      {name:{en:'Cmdr. Yuki Tanaka \u2014 First Officer',cn:'中校 田中优希 \u2014 副舰长'}},
+      {name:{en:'Lt. Marcus Chen \u2014 Navigation',cn:'上尉 马库斯·陈 \u2014 导航'},note:{en:'Recalculated approach trajectory 14 times in last 48 hours. Every recalculation predicted the same outcome.',cn:'在最后 48 小时内重新计算了 14 次抵近轨道。每一次计算结果都指向同一个终点。'}}
+    ],
+    science: [
+      {name:{en:'Dr. Amara Osei \u2014 Chief Scientist',cn:'阿玛拉·奥塞博士 \u2014 首席科学家'},note:{en:'Three days before departure, filed an unscheduled leave request for \u201Cpersonal reasons.\u201D It was denied due to mission priority.',cn:'出发前三天，以\u201C个人原因\u201D提交了一份计划外的休假申请。因任务优先级被驳回。'}},
+      {name:{en:'Dr. Nikolai Petrov \u2014 Geologist',cn:'尼古拉·彼得罗夫博士 \u2014 地质学家'}},
+      {name:{en:'Dr. Lena Bergstrom \u2014 Xenobiologist',cn:'莱娜·伯格斯特龙博士 \u2014 异星生物学家'}}
+    ],
+    engineering: [
+      {name:{en:'Chief Eng. David Park \u2014 Propulsion',cn:'总工程师 大卫·朴 \u2014 推进系统'}},
+      {name:{en:'Eng. Sofia Reyes \u2014 Systems',cn:'工程师 索菲亚·雷耶斯 \u2014 系统'}},
+      {name:{en:'Eng. Viktor Holm \u2014 Power Grid',cn:'工程师 维克托·霍尔姆 \u2014 能源网络'}}
+    ],
+    support: [
+      {name:{en:'Med. Off. Priya Kapoor',cn:'医务官 普丽雅·卡普尔'}},
+      {name:{en:'Spec. James Wright \u2014 Comms',cn:'专员 詹姆斯·赖特 \u2014 通讯'}},
+      {name:{en:'Spec. Anya Volkov \u2014 Data',cn:'专员 安雅·沃尔科夫 \u2014 数据'}}
+    ]
+  };
+
+  // 打字机内容
+  var txLinesI18n = {
+    en: [
+      '[04:17:09] Cpt. Voss: "What is that reading? I want a full spectrum analysis now."',
+      '[04:17:12] Lt. Chen: "Sir, energy output is climbing \u2014 it is not stopping."',
+      '[04:17:15] Dr. Osei: "This is impossible. The mineral is generating its own energy. There is no external source."',
+      '[04:17:18] Cpt. Voss: "All hands, brace for \u2014 "',
+      '[04:17:22] <SIGNAL LOST>'
+    ],
+    cn: [
+      '[04:17:09] 沃斯舰长："那是什么读数？我要立刻看到全光谱分析。"',
+      '[04:17:12] 陈上尉："长官，能量输出在持续攀升——它停不下来。"',
+      '[04:17:15] 奥塞博士："这不可能。矿石在自主产生能量。没有任何外部能量源。"',
+      '[04:17:18] 沃斯舰长："全员注意，准备——"',
+      '[04:17:22] <信号中断>'
+    ]
+  };
+
+  // 事故简报滚动正文
+  var briefingLinesI18n = {
+    en: [
+      'Odin-class exploration vessel, registry NX-724.',
+      'Dispatched to Sector-7 to investigate anomalous energy signatures.',
+      'First visual contact with unknown mineral deposit at 04:12:09.',
+      'Uncontrolled energy spike detected 5 minutes after approach.',
+      'All communications ceased at 04:17:22. No distress signal received.'
+    ],
+    cn: [
+      '奥丁级勘探舰，编号 NX-724。',
+      '奉命前往第七星区调查异常能量信号。',
+      '于 04:12:09 与未知矿石沉积体建立视觉接触。',
+      '抵近后 5 分钟检测到不受控的能量尖峰。',
+      '04:17:22 所有通讯中断。未收到遇险信号。'
+    ]
+  };
+
+  // ==================== 搜索索引 ====================
+  var searchIndex = {
+    en: [
+      {category:'Mission', title:'Mission Log', snippet:'Odin-class vessel NX-724 cleared for departure from Kepler-9. Entered Sector-7. Energy anomaly detected.', action:'panel', target:'mission'},
+      {category:'Mission', title:'Sector-7 Anomaly', snippet:'Anomaly localized to coordinates 47.2, -118.6. Unknown mineral composition.', action:'panel', target:'mission'},
+      {category:'Mission', title:'Signal Lost', snippet:'SIGNAL LOST. All subsequent contact attempts failed at 04:17:22.', action:'panel', target:'mission'},
+      {category:'Mission', title:'Incident Report', snippet:'USSV Odin dispatched to Sector-7. Energy origin external, centered on mineral deposit.', action:'drawer'},
+      {category:'Crew', title:'Crew Manifest', snippet:'All 12 crew members remain unaccounted for. Search suspended.', action:'panel', target:'crew'},
+      {category:'Crew', title:'Captain Elias Voss', snippet:'Commanding Officer. Status: missing.', action:'panel', target:'crew'},
+      {category:'Crew', title:'Dr. Amara Osei', snippet:'Chief Scientist. Status: missing.', action:'panel', target:'crew'},
+      {category:'Crew', title:'Lt. Marcus Chen', snippet:'Navigation officer. Status: missing.', action:'panel', target:'crew'},
+      {category:'Transmission', title:'Final Transmission', snippet:'"What is that reading? Energy output is climbing." Last bridge audio.', action:'panel', target:'transmission'},
+      {category:'Mineral', title:'Sample HADES-01', snippet:'Unknown crystalline structure. Origin unconfirmed. Self-sustaining energy output.', action:'scroll', target:'page2'},
+      {category:'Mineral', title:'Core Energy Source', snippet:'Energy density 37x baseline. Molecular structure self-replicating.', action:'hotspot', target:'hotspot1'},
+      {category:'Mineral', title:'Alloy Reaction Zone', snippet:'Hull alloy matching USSV Odin. Unknown chemical bonding caused disintegration.', action:'hotspot', target:'hotspot2'},
+      {category:'Mineral', title:'Spectral Analysis', snippet:'Unknown Element A 18.7%. Energy output spectrum and thermal analysis.', action:'modal'},
+      {category:'Archive', title:'Contact Information', snippet:'Federal Space Administration. Level 4 clearance required.', action:'panel', target:'contact'}
+    ],
+    cn: [
+      {category:'任务', title:'任务日志', snippet:'奥丁级勘探舰 NX-724 从开普勒-9 出发。进入第七星区，探测到能量异常。', action:'panel', target:'mission'},
+      {category:'任务', title:'第七星区异常', snippet:'异常定位于坐标 47.2, -118.6。未知矿物成分，联邦数据库无匹配。', action:'panel', target:'mission'},
+      {category:'任务', title:'信号中断', snippet:'04:17:22 信号中断，此后所有联络尝试失败。', action:'panel', target:'mission'},
+      {category:'任务', title:'事故报告', snippet:'奥丁号奉命前往第七星区。能量源外部，集中在未知矿石沉积体。', action:'drawer'},
+      {category:'船员', title:'船员名册', snippet:'12 名船员全部下落不明，搜救行动已中止。', action:'panel', target:'crew'},
+      {category:'船员', title:'舰长 埃利亚斯·沃斯', snippet:'指挥官。状态：失联。', action:'panel', target:'crew'},
+      {category:'船员', title:'阿玛拉·奥塞博士', snippet:'首席科学家。状态：失联。', action:'panel', target:'crew'},
+      {category:'船员', title:'马库斯·陈上尉', snippet:'导航官。状态：失联。', action:'panel', target:'crew'},
+      {category:'最后通讯', title:'最后通讯', snippet:'"那是什么读数？能量输出在攀升。"舰桥最后音频。', action:'panel', target:'transmission'},
+      {category:'矿石', title:'样本 HADES-01', snippet:'未知晶体结构，来源未确认。自持能量输出。', action:'scroll', target:'page2'},
+      {category:'矿石', title:'核心能量源', snippet:'能量密度为基线 37 倍。分子结构自我复制。', action:'hotspot', target:'hotspot1'},
+      {category:'矿石', title:'合金反应带', snippet:'检测到奥丁号舰体合金。未知化合反应导致解体。', action:'hotspot', target:'hotspot2'},
+      {category:'矿石', title:'光谱分析', snippet:'未知元素 A 18.7%。能量输出光谱与热力学分析。', action:'modal'},
+      {category:'档案', title:'联络信息', snippet:'联邦航天局。访问完整档案需 4 级安全许可。', action:'panel', target:'contact'}
+    ]
+  };
+
+  // ===== 当前语言状态 =====
+  var currentLang = localStorage.getItem('hades-lang') || 'en';
+
+  // ===== 翻译函数 =====
+  function t(key){
+    var entry = I18N[key];
+    return entry ? (entry[currentLang] || entry.en) : key;
+  }
+
+  function translateAll(){
+    // 静态 data-i18n (textContent)
+    var els = document.querySelectorAll('[data-i18n]');
+    for(var i = 0; i < els.length; i++){
+      var el = els[i];
+      var key = el.getAttribute('data-i18n');
+      if(I18N[key]){
+        el.textContent = t(key);
+      }
+    }
+
+    // 占位符
+    var phEls = document.querySelectorAll('[data-i18n-placeholder]');
+    for(var pi = 0; pi < phEls.length; pi++){
+      var phel = phEls[pi];
+      var pkey = phel.getAttribute('data-i18n-placeholder');
+      if(I18N[pkey]){
+        phel.setAttribute('placeholder', t(pkey));
+      }
+    }
+
+    // HTML 类型 data-i18n-html (innerHTML)
+    var htmlEls = document.querySelectorAll('[data-i18n-html]');
+    for(var j = 0; j < htmlEls.length; j++){
+      var hel = htmlEls[j];
+      var hkey = hel.getAttribute('data-i18n-html');
+      if(I18N[hkey]){
+        hel.innerHTML = t(hkey);
+      }
+    }
+
+    // 特殊：main hero title 需要更新 data-after（给 CSS ::after 的流光用）
+    var heroTitle = document.querySelector('.hero h1');
+    heroTitle.setAttribute('data-after', t('hero-title'));
+
+    // 重建滚动简报
+    buildReportScroll();
+
+    // 重建扫描数据列
+    buildScanDataBlocks();
+
+    // 重建船员列表
+    buildCrewLists();
+
+    // 重置打字机状态（下次打开面板会重新播放）
+    typewriterDone = false;
+
+    // 更新搜索提示
+    buildSearchHints();
+
+    updateLangToggleUI();
+  }
+
+  // ===== 语言切换按钮 =====
+  function updateLangToggleUI(){
+    var opts = langToggle.querySelectorAll('.lang-option');
+    for(var o = 0; o < opts.length; o++){
+      var opt = opts[o];
+      if(opt.getAttribute('data-lang') === currentLang){
+        opt.classList.add('active');
+      } else {
+        opt.classList.remove('active');
+      }
+    }
+  }
+
+  langToggle.addEventListener('click', function(){
+    currentLang = currentLang === 'en' ? 'cn' : 'en';
+    localStorage.setItem('hades-lang', currentLang);
+    translateAll();
+    // 重建 art title（逐字动画）
+    buildArtTitle();
+    // 如果搜索开着，刷新结果
+    if(searchOverlay.classList.contains('active')){
+      renderSearchResults(searchInput.value);
+    }
+  });
+
+  // ===== 滚动过渡 =====
+  var ticking = false;
+  function onScroll(){
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(function(){
+      var sy = window.scrollY;
+      var vh = window.innerHeight;
+      var p = Math.max(0, Math.min(1, sy / vh));
+      var p1fade = Math.max(0, 1 - Math.max(0, p - 0.05) / 0.5);
+      var p2fade = Math.max(0, Math.min(1, (p - 0.45) / 0.4));
+      root.style.setProperty('--p1fade', p1fade.toFixed(3));
+      root.style.setProperty('--p2fade', p2fade.toFixed(3));
+      ticking = false;
+    });
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+
+  // ===== 第二页鼠标交互 =====
+  function onP2Move(e){
+    var rect = page2.getBoundingClientRect();
+    var x, y;
+    if(e.touches && e.touches.length > 0){
+      x = e.touches[0].clientX - rect.left;
+      y = e.touches[0].clientY - rect.top;
+    } else {
+      x = e.clientX - rect.left;
+      y = e.clientY - rect.top;
+    }
+    maskLayer.style.setProperty('--mx', x + 'px');
+    maskLayer.style.setProperty('--my', y + 'px');
+  }
+  page2.addEventListener('mousemove', onP2Move);
+  page2.addEventListener('touchmove', onP2Move, {passive:true});
+
+  // ===== 第二页星尘粒子 =====
+  for(var i = 0; i < 40; i++){
+    var dot = document.createElement('span');
+    var size = 1 + Math.random() * 2.5;
+    dot.style.width = size + 'px';
+    dot.style.height = size + 'px';
+    dot.style.left = Math.random() * 100 + '%';
+    dot.style.top = (50 + Math.random() * 50) + '%';
+    dot.style.animationDuration = (16 + Math.random() * 12) + 's';
+    dot.style.animationDelay = (Math.random() * 30) + 's';
+    dot.style.opacity = (0.25 + Math.random() * 0.5).toFixed(2);
+    stardust.appendChild(dot);
+  }
+
+  // ===== 第二页标题逐字生成 =====
+  function buildArtTitle(){
+    artTitle.innerHTML = '';
+    var titleText = t('art-title');
+    for(var j = 0; j < titleText.length; j++){
+      var span = document.createElement('span');
+      span.textContent = titleText[j] === ' ' ? '\u00A0' : titleText[j];
+      span.style.animationDelay = (j * 0.12) + 's';
+      artTitle.appendChild(span);
+    }
+  }
+
+  // ===== 扫描数据列 =====
+  function buildScanDataBlocks(){
+    var container = document.getElementById('scanDataBlocks');
+    container.innerHTML = '';
+    var colsData = [
+      {header: scanDataI18n.header1, lines: scanDataI18n.col1},
+      {header: scanDataI18n.header2, lines: scanDataI18n.col2},
+      {header: scanDataI18n.header3, lines: scanDataI18n.col3}
+    ];
+    for(var ci = 0; ci < colsData.length; ci++){
+      var col = document.createElement('div');
+      col.className = 'col';
+      var hdr = document.createElement('div');
+      hdr.className = 'line';
+      hdr.style.color = 'rgba(100,180,255,0.65)';
+      hdr.style.fontSize = '0.65rem';
+      hdr.textContent = colsData[ci].header[currentLang];
+      col.appendChild(hdr);
+      for(var li = 0; li < colsData[ci].lines.length; li++){
+        var ldiv = document.createElement('div');
+        ldiv.className = 'line';
+        ldiv.textContent = colsData[ci].lines[li][currentLang];
+        col.appendChild(ldiv);
+      }
+      container.appendChild(col);
+    }
+  }
+
+  // ===== 船员列表构建 =====
+  function buildCrewLists(){
+    var sections = ['bridge','science','engineering','support'];
+    var targetIds = ['crewBridge','crewScience','crewEngineering','crewSupport'];
+    for(var si = 0; si < sections.length; si++){
+      var listEl = document.getElementById(targetIds[si]);
+      if(!listEl) continue;
+      listEl.innerHTML = '';
+      var members = crewI18n[sections[si]];
+      for(var mi = 0; mi < members.length; mi++){
+        var item = document.createElement('div');
+        item.className = 'crew-item';
+        item.innerHTML = '<div><span>' + members[mi].name[currentLang] + '</span><span class="crew-status">' + t('crew-missing') + '</span>' + (members[mi].note ? '<div class="crew-note">' + members[mi].note[currentLang] + '</div>' : '') + '</div>';
+        listEl.appendChild(item);
+      }
+    }
+  }
+
+  // ===== 事故简报滚动 =====
+  function buildReportScroll(){
+    var scrollEl = document.getElementById('reportScroll');
+    scrollEl.innerHTML = '';
+    var lines = briefingLinesI18n[currentLang];
+    // 重复两遍实现无缝滚动
+    for(var r = 0; r < 2; r++){
+      for(var li = 0; li < lines.length; li++){
+        var p = document.createElement('p');
+        p.textContent = lines[li];
+        scrollEl.appendChild(p);
+      }
+    }
+  }
+
+  // ===== 视频可见性 =====
+  if('IntersectionObserver' in window){
+    var videoObserver = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          bgVideo.play().catch(function(){});
+        } else {
+          bgVideo.pause();
+        }
+      });
+    }, {threshold: 0.3});
+    videoObserver.observe(page1);
+  }
+
+  // ===== 导航面板系统 =====
+  var panelOverlay = document.getElementById('panelOverlay');
+  var panels = {
+    mission: document.getElementById('panelMission'),
+    crew: document.getElementById('panelCrew'),
+    transmission: document.getElementById('panelTx'),
+    contact: document.getElementById('panelContact')
+  };
+  var activePanel = null;
+
+  function openPanel(name){
+    if(activePanel) closePanel();
+    var p = panels[name];
+    if(!p) return;
+    panelOverlay.classList.add('active');
+    p.classList.add('active');
+    activePanel = name;
+    document.body.style.overflow = 'hidden';
+
+    // 打字机效果
+    if(name === 'transmission'){
+      startTypewriter();
+    }
+  }
+
+  function closePanel(){
+    if(activePanel){
+      panels[activePanel].classList.remove('active');
+      panelOverlay.classList.remove('active');
+      activePanel = null;
+      document.body.style.overflow = '';
+    }
+  }
+
+  var navLinks = document.querySelectorAll('.nav a[data-panel]');
+  for(var k = 0; k < navLinks.length; k++){
+    navLinks[k].addEventListener('click', function(e){
+      e.preventDefault();
+      for(var m = 0; m < navLinks.length; m++) navLinks[m].classList.remove('active');
+      this.classList.add('active');
+      openPanel(this.getAttribute('data-panel'));
+    });
+  }
+
+  panelOverlay.addEventListener('click', closePanel);
+  var closeBtns = document.querySelectorAll('[data-close]');
+  for(var n = 0; n < closeBtns.length; n++){
+    closeBtns[n].addEventListener('click', function(e){
+      e.stopPropagation();
+      closePanel();
+    });
+  }
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      if(searchOverlay.classList.contains('active')){
+        closeSearch();
+        return;
+      }
+      if(activePanel) closePanel();
+      if(drawerOverlay.classList.contains('active')) closeDrawer();
+      if(modalOverlay.classList.contains('active')) closeModal();
+      if(loreOverlay.classList.contains('active')){ closeLore(); return; }
+    }
+    if(e.key === '/' && !searchOverlay.classList.contains('active')){
+      // 避免在输入框里触发
+      if(e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA'){
+        e.preventDefault();
+        openSearch();
+      }
+    }
+  });
+
+  // ===== 打字机效果 =====
+  var txIdx = 0, typewriterDone = false;
+  var typewriterEl = document.getElementById('typewriterTx');
+
+  function startTypewriter(){
+    if(typewriterDone) return;
+    typewriterDone = true;
+    txIdx = 0;
+    typewriterEl.innerHTML = '';
+    typeNextLine();
+  }
+
+  function typeNextLine(){
+    var lines = txLinesI18n[currentLang];
+    if(txIdx >= lines.length){
+      // All lines typed — begin 3.2s signal recovery suspense
+      setTimeout(showSignalRecovery, 3200);
+      return;
+    }
+    var line = lines[txIdx];
+    var charIdx = 0;
+    var lineEl = document.createElement('div');
+
+    function typeChar(){
+      if(charIdx < line.length){
+        lineEl.innerHTML = line.substring(0, charIdx + 1);
+        if(charIdx + 1 >= line.length){
+          typewriterEl.appendChild(lineEl);
+          txIdx++;
+          setTimeout(typeNextLine, 600);
+        } else {
+          charIdx++;
+          setTimeout(typeChar, 30 + Math.random() * 40);
+        }
+      }
+    }
+    typeChar();
+  }
+
+  function showSignalRecovery(){
+    var garbled = currentLang === 'en'
+      ? '[04:17:25] \u2588\u2580\u2584\u2580\u2588\u2584\u2580 \u2588\u2580\u2584 \u2588\u2584\u2580\u2588\u2584 \u2580\u2588\u2580\u2584 \u2584\u2580\u2588 ...\u00B6\u00B6\u23DA RE-ACQUIRING...'
+      : '[04:17:25] \u2588\u2580\u2584\u2580\u2588\u2584\u2580 \u2588\u2580\u2584 \u2588\u2584\u2580\u2588\u2584 \u2580\u2588\u2580\u2584 \u2584\u2580\u2588 ...\u00B6\u00B6\u23DA \u6B63\u5728\u6062\u590D\u4FE1\u53F7...';
+
+    var garbledEl = document.createElement('div');
+    garbledEl.style.opacity = '0';
+    garbledEl.style.transition = 'opacity 1.2s ease';
+    garbledEl.style.color = 'rgba(200,225,240,0.45)';
+    garbledEl.style.fontFamily = '"Courier New",monospace';
+    garbledEl.style.fontSize = '0.78rem';
+    garbledEl.style.letterSpacing = '0.06em';
+    garbledEl.style.marginTop = '18px';
+    garbledEl.textContent = garbled;
+    typewriterEl.appendChild(garbledEl);
+
+    requestAnimationFrame(function(){
+      garbledEl.style.opacity = '1';
+    });
+
+    setTimeout(function(){
+      var unableEl = document.createElement('div');
+      unableEl.style.opacity = '0';
+      unableEl.style.transition = 'opacity 0.8s ease';
+      unableEl.style.color = 'rgba(255,80,60,0.75)';
+      unableEl.style.fontFamily = '"Cinzel",serif';
+      unableEl.style.fontSize = '1rem';
+      unableEl.style.letterSpacing = '0.18em';
+      unableEl.style.marginTop = '10px';
+      unableEl.textContent = currentLang === 'en' ? '<UNABLE TO DECODE>' : '\u003C\u65E0\u6CD5\u89E3\u7801\u003E';
+      typewriterEl.appendChild(unableEl);
+
+      requestAnimationFrame(function(){
+        unableEl.style.opacity = '1';
+      });
+
+      setTimeout(function(){
+        garbledEl.style.transition = 'opacity 2s ease';
+        unableEl.style.transition = 'opacity 2s ease';
+        garbledEl.style.opacity = '0';
+        unableEl.style.opacity = '0';
+      }, 2500);
+    }, 1800);
+  }
+
+  // ===== 左侧抽屉 =====
+  var drawerOverlay = document.getElementById('drawerOverlay');
+  var incidentDrawer = document.getElementById('incidentDrawer');
+  var openDrawerBtn = document.getElementById('openDrawer');
+  var drawerCloseBtn = document.getElementById('drawerClose');
+
+  function openDrawer(){
+    drawerOverlay.classList.add('active');
+    incidentDrawer.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer(){
+    drawerOverlay.classList.remove('active');
+    incidentDrawer.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  openDrawerBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    openDrawer();
+  });
+  drawerCloseBtn.addEventListener('click', closeDrawer);
+  drawerOverlay.addEventListener('click', closeDrawer);
+
+  // ===== 矿石扫描热点 =====
+  var hotspot1 = document.getElementById('hotspot1');
+  var hotspot2 = document.getElementById('hotspot2');
+
+  function activateHotspot(id){
+    if(id === 'hotspot1'){
+      hotspot1.classList.toggle('active');
+      hotspot2.classList.remove('active');
+    } else {
+      hotspot2.classList.toggle('active');
+      hotspot1.classList.remove('active');
+    }
+  }
+
+  hotspot1.addEventListener('click', function(e){
+    e.stopPropagation();
+    activateHotspot('hotspot1');
+  });
+  hotspot2.addEventListener('click', function(e){
+    e.stopPropagation();
+    activateHotspot('hotspot2');
+  });
+  page2.addEventListener('click', function(e){
+    if(!e.target.closest('.hotspot')){
+      hotspot1.classList.remove('active');
+      hotspot2.classList.remove('active');
+    }
+  });
+
+  // Hotspot auto-pulse: continuously guide user to interactable zones
+  setTimeout(function(){
+    [hotspot1, hotspot2].forEach(function(hs){
+      var dot = hs.querySelector('.hotspot-dot');
+      var burst = document.createElement('div');
+      burst.className = 'auto-burst';
+      dot.appendChild(burst);
+    });
+  }, 2000);
+
+  // ===== 下载扫描数据弹窗 =====
+  var modalOverlay = document.getElementById('modalOverlay');
+  var modalClose = document.getElementById('modalClose');
+
+  function openModal(){
+    modalOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    setTimeout(function(){
+      var bars = document.querySelectorAll('.chart-bar');
+      for(var b = 0; b < bars.length; b++){
+        bars[b].style.height = bars[b].getAttribute('data-h');
+      }
+    }, 200);
+  }
+  function closeModal(){
+    modalOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+    var bars = document.querySelectorAll('.chart-bar');
+    for(var c = 0; c < bars.length; c++){
+      bars[c].style.height = '0%';
+    }
+  }
+
+  downloadBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    openModal();
+  });
+  modalClose.addEventListener('click', closeModal);
+  modalOverlay.addEventListener('click', function(e){
+    if(e.target === modalOverlay) closeModal();
+  });
+
+  // ===== 搜索系统 =====
+  var searchOverlay = document.getElementById('searchOverlay');
+  var searchInput = document.getElementById('searchInput');
+  var searchClose = document.getElementById('searchClose');
+  var searchTrigger = document.getElementById('searchTrigger');
+  var searchResults = document.getElementById('searchResults');
+  var searchHints = document.getElementById('searchHints');
+
+  function openSearch(){
+    searchOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    setTimeout(function(){ searchInput.focus(); }, 100);
+    renderSearchResults(searchInput.value);
+  }
+
+  function closeSearch(){
+    searchOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function highlight(text, query){
+    if(!query) return text;
+    var q = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    var re = new RegExp('(' + q + ')', 'gi');
+    return text.replace(re, '<mark>$1</mark>');
+  }
+
+  function buildSearchHints(){
+    searchHints.innerHTML = '';
+    var hints = ['search-hint-mission','search-hint-crew','search-hint-mineral','search-hint-energy'];
+    for(var hi = 0; hi < hints.length; hi++){
+      var span = document.createElement('span');
+      span.className = 'search-hint';
+      span.textContent = t(hints[hi]);
+      span.addEventListener('click', function(){
+        searchInput.value = this.textContent;
+        renderSearchResults(this.textContent);
+      });
+      searchHints.appendChild(span);
+    }
+  }
+
+  function renderSearchResults(query){
+    query = (query || '').trim().toLowerCase();
+    if(!query){
+      searchResults.innerHTML = '';
+      return;
+    }
+    var index = searchIndex[currentLang] || searchIndex.en;
+    var matched = [];
+    for(var ri = 0; ri < index.length; ri++){
+      var item = index[ri];
+      var titleLower = item.title.toLowerCase();
+      var snippetLower = item.snippet.toLowerCase();
+      var catLower = item.category.toLowerCase();
+      if(titleLower.indexOf(query) !== -1 || snippetLower.indexOf(query) !== -1 || catLower.indexOf(query) !== -1){
+        matched.push(item);
+      }
+    }
+
+    if(matched.length === 0){
+      searchResults.innerHTML = '<div class="search-empty">' + t('search-empty') + '</div>';
+      return;
+    }
+
+    // 按 category 分组
+    var grouped = {};
+    for(var mi = 0; mi < matched.length; mi++){
+      var m = matched[mi];
+      if(!grouped[m.category]) grouped[m.category] = [];
+      grouped[m.category].push(m);
+    }
+
+    var html = '';
+    for(var cat in grouped){
+      html += '<div class="search-category">' + cat + '</div>';
+      var items = grouped[cat];
+      for(var ii = 0; ii < items.length; ii++){
+        var it = items[ii];
+        html += '<div class="search-result-item" data-action="' + it.action + '" data-target="' + (it.target || '') + '">';
+        html += '<div class="search-result-title">' + highlight(it.title, query) + '</div>';
+        html += '<div class="search-result-snippet">' + highlight(it.snippet, query) + '</div>';
+        html += '</div>';
+      }
+    }
+    searchResults.innerHTML = html;
+
+    // 绑定结果点击
+    var itemsEls = searchResults.querySelectorAll('.search-result-item');
+    for(var ai = 0; ai < itemsEls.length; ai++){
+      itemsEls[ai].addEventListener('click', function(){
+        var action = this.getAttribute('data-action');
+        var target = this.getAttribute('data-target');
+        closeSearch();
+        if(action === 'panel'){
+          openPanel(target);
+        } else if(action === 'drawer'){
+          openDrawer();
+        } else if(action === 'modal'){
+          openModal();
+        } else if(action === 'scroll'){
+          if(target === 'page2'){
+            page2.scrollIntoView({behavior:'smooth'});
+          }
+        } else if(action === 'hotspot'){
+          page2.scrollIntoView({behavior:'smooth'});
+          setTimeout(function(){ activateHotspot(target); }, 600);
+        }
+      });
+    }
+  }
+
+  searchTrigger.addEventListener('click', function(e){
+    e.preventDefault();
+    openSearch();
+  });
+  searchClose.addEventListener('click', closeSearch);
+  searchOverlay.addEventListener('click', function(e){
+    if(e.target === searchOverlay) closeSearch();
+  });
+  searchInput.addEventListener('input', function(){
+    renderSearchResults(this.value);
+  });
+
+  // ===== 世界观档案 =====
+  var loreOverlay = document.getElementById('loreOverlay');
+  var loreClose = document.getElementById('loreClose');
+  var navLore = document.getElementById('navLore');
+  var loreRendered = false;
+  function openLore(){ loreOverlay.classList.add('active'); document.body.style.overflow='hidden';
+    if(!loreRendered){
+      var mdEl = document.getElementById('loreMd');
+      var mdText = mdEl ? mdEl.textContent : '';
+      if(mdText && typeof renderMarkdown === 'function'){
+        document.getElementById('loreContainer').innerHTML = renderMarkdown(mdText);
+        loreRendered = true;
+      }
+    }
+  }
+  function closeLore(){ loreOverlay.classList.remove('active'); document.body.style.overflow=''; }
+  navLore.addEventListener('click', function(e){ e.preventDefault(); openLore(); });
+  loreClose.addEventListener('click', closeLore);
+  loreOverlay.addEventListener('click', function(e){ if(e.target === loreOverlay) closeLore(); });
+
+  // ===== 初始化 =====
+  updateLangToggleUI();
+  buildReportScroll();
+  buildArtTitle();
+  buildScanDataBlocks();
+  buildCrewLists();
+  buildSearchHints();
+  onScroll();
+})();
+</script>
+
+<!-- Markdown to HTML renderer for lore overlay -->
+<script>
+function renderMarkdown(md) {
+  var lines = md.split('\n');
+  var out = '';
+  var inTable = false, inCode = false, inBq = false, inList = false, listTag = '';
+  var tableHtml = '', bqHtml = '', i = 0;
+
+  function flushBq() { if(inBq){ out+=bqHtml; bqHtml=''; inBq=false; } }
+  function flushTable() { if(inTable){ out+='<table>'+tableHtml+'</table>'; tableHtml=''; inTable=false; } }
+  function flushList() { if(inList){ out+='</'+listTag+'>'; inList=false; listTag=''; } }
+
+  function fmt(t) {
+    t = t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    t = t.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+    t = t.replace(/`(.+?)`/g, '<code>$1</code>');
+    return t;
+  }
+
+  function esc(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  for(i=0; i<lines.length; i++) {
+    var l = lines[i], t = l.trim();
+    if(t===''){ flushBq(); flushTable(); flushList(); continue; }
+
+    if(t.startsWith('```')){ flushBq(); flushTable(); flushList();
+      if(inCode){ out+='</code></pre>'; inCode=false; }
+      else { out+='<pre><code>'; inCode=true; }
+      continue;
+    }
+    if(inCode){ out+=esc(l)+'\n'; continue; }
+
+    if(t.startsWith('>')){ flushTable(); flushList();
+      if(!inBq) inBq=true;
+      bqHtml += '<p>'+fmt(t.replace(/^>\s*/,''))+'</p>';
+      continue;
+    }
+
+    if((t.startsWith('|') && t.endsWith('|')) || (inTable && t.startsWith('|'))){ flushBq(); flushList();
+      if(!inTable) inTable=true;
+      var cells = t.split('|').filter(function(c){ return c.trim()!==''; });
+      if(cells.every(function(c){ return /^[-:]+$/.test(c.trim()); })) continue;
+      var tg = (tableHtml==='') ? 'th' : 'td';
+      var row='<tr>';
+      cells.forEach(function(c){ row+='<'+tg+'>'+fmt(c.trim())+'</'+tg+'>'; });
+      row+='</tr>'; tableHtml+=row;
+      continue;
+    }
+
+    flushBq(); flushTable();
+
+    if(/^(-{3,}|\*{3,})$/.test(t)){ flushList(); out+='<hr>'; continue; }
+
+    var hm = t.match(/^(#{1,4})\s+(.+)/);
+    if(hm){ flushList(); out+='<h'+hm[1].length+'>'+fmt(hm[2])+'</h'+hm[1].length+'>'; continue; }
+
+    var om = t.match(/^(\d+)\.\s+(.+)/);
+    if(om){ if(!inList||listTag!=='ol'){ flushList(); out+='<ol>'; inList=true; listTag='ol'; }
+      out+='<li>'+fmt(om[2])+'</li>'; continue; }
+
+    if(t.startsWith('- ')||t.startsWith('* ')){ if(!inList||listTag!=='ul'){ flushList(); out+='<ul>'; inList=true; listTag='ul'; }
+      out+='<li>'+fmt(t.slice(2))+'</li>'; continue; }
+
+    flushList(); out+='<p>'+fmt(t)+'</p>';
+  }
+  flushBq(); flushTable(); flushList();
+  if(inCode) out+='</code></pre>';
+  return out;
+}
+</script>
+
+</body>
+</html>
